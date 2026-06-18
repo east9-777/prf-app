@@ -1,11 +1,11 @@
 {
   "expo": {
     "name": "Project P.R.F",
-    "slug": "prf-app",
+    "slug": "project-prf",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "prf-app",
+    "scheme": "project-prf",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "splash": {
