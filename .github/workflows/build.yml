@@ -23,16 +23,15 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install EAS CLI Globally
-        run: pnpm add -g eas-cli
+      - name: Install dependencies (including EAS CLI local)
+        run: |
+          pnpm add -D eas-cli
+          pnpm install
 
-      - name: Setup EAS (Authentication Only)
+      - name: Setup EAS (Authentication)
         uses: expo/expo-github-action@v8
         with:
           token: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Install dependencies
-        run: pnpm install
-
       - name: Build APK
-        run: eas build --platform android --profile preview --non-interactive
+        run: pnpm exec eas build --platform android --profile preview --non-interactive
