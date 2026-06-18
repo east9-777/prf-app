@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
@@ -19,6 +20,16 @@ import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "@/context/AuthContext";
 import { useColors } from "@/hooks/useColors";
+import { isFirebaseConfigured, storage } from "@/lib/firebase";
+
+async function uploadProfilePhoto(uri: string, uid: string): Promise<string> {
+  if (!isFirebaseConfigured) return uri;
+  const response = await fetch(uri);
+  const blob = await response.blob();
+  const storageRef = ref(storage, `profilePhotos/${uid}`);
+  await uploadBytes(storageRef, blob);
+  return await getDownloadURL(storageRef);
+}
 
 export default function SetupUsernameScreen() {
   const colors = useColors();
@@ -27,19 +38,16 @@ export default function SetupUsernameScreen() {
   const insets = useSafeAreaInsets();
 
   const [username, setUsername] = useState("");
-  const [photoURI, setPhotoURI] = useState("");
+  const [photoURI, setPhotoURI] = useState(user?.photoURL ?? "");
   const [checking, setChecking] = useState(false);
   const [usernameError, setUsernameError] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const validateUsername = (value: string) => {
-    const clean = value.replace(/[^a-zA-Z0-9_]/g, "");
-    return clean;
-  };
+  const validateUsername = (value: string) =>
+    value.replace(/[^a-zA-Z0-9_]/g, "");
 
   const handleUsernameChange = (text: string) => {
-    const clean = validateUsername(text);
-    setUsername(clean);
+    setUsername(validateUsername(text));
     setUsernameError("");
   };
 
@@ -90,12 +98,23 @@ export default function SetupUsernameScreen() {
       setSaving(true);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       if (!user) return;
+
+      let finalPhotoURL = photoURI;
+      if (photoURI && photoURI !== user.photoURL && isFirebaseConfigured) {
+        try {
+          finalPhotoURL = await uploadProfilePhoto(photoURI, user.id);
+        } catch {
+          finalPhotoURL = photoURI;
+        }
+      }
+
       await registerUser({
         ...user,
         username,
-        photoURL: photoURI,
+        photoURL: finalPhotoURL,
         role: "usuario",
       });
+
       router.replace("/(tabs)");
     } finally {
       setSaving(false);
@@ -109,7 +128,8 @@ export default function SetupUsernameScreen() {
         styles.container,
         {
           paddingTop: insets.top + 20 + (Platform.OS === "web" ? 67 : 0),
-          paddingBottom: insets.bottom + 32 + (Platform.OS === "web" ? 34 : 0),
+          paddingBottom:
+            insets.bottom + 32 + (Platform.OS === "web" ? 34 : 0),
         },
       ]}
       keyboardShouldPersistTaps="handled"
@@ -151,11 +171,15 @@ export default function SetupUsernameScreen() {
             styles.inputRow,
             {
               backgroundColor: colors.card,
-              borderColor: usernameError ? colors.destructive : colors.border,
+              borderColor: usernameError
+                ? colors.destructive
+                : colors.border,
             },
           ]}
         >
-          <Text style={[styles.atSign, { color: colors.mutedForeground }]}>@</Text>
+          <Text style={[styles.atSign, { color: colors.mutedForeground }]}>
+            @
+          </Text>
           <TextInput
             style={[styles.input, { color: colors.text }]}
             placeholder="seunome"
@@ -185,9 +209,10 @@ export default function SetupUsernameScreen() {
         style={({ pressed }) => [
           styles.btn,
           {
-            backgroundColor: !username || username.length < 3
-              ? colors.muted
-              : colors.primary,
+            backgroundColor:
+              !username || username.length < 3
+                ? colors.muted
+                : colors.primary,
             opacity: pressed ? 0.85 : 1,
           },
         ]}
@@ -218,16 +243,8 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginTop: -12,
   },
-  photoSection: {
-    alignItems: "center",
-    gap: 8,
-    paddingVertical: 8,
-  },
-  photo: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-  },
+  photoSection: { alignItems: "center", gap: 8, paddingVertical: 8 },
+  photo: { width: 100, height: 100, borderRadius: 50 },
   photoPlaceholder: {
     width: 100,
     height: 100,
@@ -237,19 +254,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  photoLabel: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 15,
-  },
-  photoHint: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 12,
-  },
+  photoLabel: { fontFamily: "Inter_600SemiBold", fontSize: 15 },
+  photoHint: { fontFamily: "Inter_400Regular", fontSize: 12 },
   inputSection: { gap: 8 },
-  label: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 14,
-  },
+  label: { fontFamily: "Inter_600SemiBold", fontSize: 14 },
   inputRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -259,23 +267,10 @@ const styles = StyleSheet.create({
     height: 52,
     gap: 4,
   },
-  atSign: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 18,
-  },
-  input: {
-    flex: 1,
-    fontFamily: "Inter_500Medium",
-    fontSize: 16,
-  },
-  error: {
-    fontFamily: "Inter_500Medium",
-    fontSize: 12,
-  },
-  hint: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 12,
-  },
+  atSign: { fontFamily: "Inter_600SemiBold", fontSize: 18 },
+  input: { flex: 1, fontFamily: "Inter_500Medium", fontSize: 16 },
+  error: { fontFamily: "Inter_500Medium", fontSize: 12 },
+  hint: { fontFamily: "Inter_400Regular", fontSize: 12 },
   btn: {
     height: 56,
     borderRadius: 14,

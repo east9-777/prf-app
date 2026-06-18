@@ -51,7 +51,10 @@ function PRFHeader({ onMenuPress, onSearchPress }: { onMenuPress: () => void; on
 export default function TabLayout() {
   const colors = useColors();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const TAB_BAR_HEIGHT = 56;
 
   return (
     <>
@@ -65,16 +68,21 @@ export default function TabLayout() {
           tabBarActiveTintColor: colors.primary,
           tabBarInactiveTintColor: colors.mutedForeground,
           tabBarStyle: {
-            backgroundColor: Platform.OS === "ios" ? "transparent" : colors.background,
+            backgroundColor: colors.background,
             borderTopWidth: 1,
             borderTopColor: colors.border,
             elevation: 0,
-            height: Platform.OS === "web" ? 84 : undefined,
+            shadowOpacity: 0,
+            height: Platform.OS === "web"
+              ? 84
+              : TAB_BAR_HEIGHT + insets.bottom,
+            paddingBottom: Platform.OS === "web" ? 0 : insets.bottom,
+            paddingTop: 8,
           },
           tabBarLabelStyle: {
             fontFamily: "Inter_500Medium",
             fontSize: 10,
-            marginBottom: Platform.OS === "ios" ? 0 : 4,
+            marginBottom: 2,
           },
           headerShown: false,
         }}

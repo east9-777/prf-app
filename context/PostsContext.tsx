@@ -3,13 +3,29 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
+import {
+  addDoc,
+  arrayRemove,
+  arrayUnion,
+  collection,
+  deleteDoc,
+  doc,
+  increment,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+  updateDoc,
+} from "firebase/firestore";
+import { db, isFirebaseConfigured } from "@/lib/firebase";
 import { getData, storeData, STORAGE_KEYS } from "@/lib/storage";
 import {
-  MOCK_POSTS,
-  MOCK_COMMUNITY_POSTS,
   MOCK_COMMENTS,
+  MOCK_COMMUNITY_POSTS,
+  MOCK_POSTS,
 } from "@/lib/mockData";
 import type { Comment, Post } from "@/lib/types";
 import { useAuth } from "@/context/AuthContext";
@@ -22,10 +38,23 @@ interface PostsContextType {
   toggleLike: (postId: string) => void;
   toggleSave: (postId: string) => void;
   toggleCommentLike: (commentId: string) => void;
-  addPost: (post: Omit<Post, "id" | "createdAt" | "likes" | "likedBy" | "commentCount" | "savedBy" | "reportedBy">) => void;
+  addPost: (
+    post: Omit<
+      Post,
+      | "id"
+      | "createdAt"
+      | "likes"
+      | "likedBy"
+      | "commentCount"
+      | "savedBy"
+      | "reportedBy"
+    >
+  ) => void;
   deletePost: (postId: string) => void;
   togglePin: (postId: string) => void;
-  addComment: (comment: Omit<Comment, "id" | "likes" | "likedBy" | "createdAt">) => void;
+  addComment: (
+    comment: Omit<Comment, "id" | "likes" | "likedBy" | "createdAt">
+  ) => void;
   getPostComments: (postId: string) => Comment[];
   refreshPosts: () => Promise<void>;
 }
@@ -38,19 +67,101 @@ export function PostsProvider({ children }: { children: React.ReactNode }) {
   const [communityPosts, setCommunityPosts] = useState<Post[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const novelPostIds = useRef<Set<string>>(new Set());
 
-  const loadPosts = useCallback(async () => {
+  useEffect(() => {
+    novelPostIds.current = new Set(novelPosts.map((p) => p.id));
+  }, [novelPosts]);
+
+  useEffect(() => {
+    if (!isFirebaseConfigured) {
+      loadLocalPosts();
+      return;
+    }
+
+    setIsLoading(true);
+
+    const novelQ = query(
+      collection(db, "posts"),
+      orderBy("isPinned", "desc"),
+      orderBy("createdAt", "desc")
+    );
+    const communityQ = query(
+      collection(db, "communityPosts"),
+      orderBy("createdAt", "desc")
+    );
+    const commentsQ = query(
+      collection(db, "comments"),
+      orderBy("createdAt", "asc")
+    );
+
+    let novelLoaded = false;
+    let communityLoaded = false;
+    let commentsLoaded = false;
+
+    const checkAllLoaded = () => {
+      if (novelLoaded && communityLoaded && commentsLoaded) {
+        setIsLoading(false);
+      }
+    };
+
+    const unsubNovel = onSnapshot(novelQ, (snap) => {
+      const posts = snap.docs.map((d) => ({
+        ...(d.data() as Omit<Post, "id">),
+        id: d.id,
+        createdAt:
+          (d.data().createdAt?.toDate?.() ?? new Date()).toISOString(),
+      }));
+      setNovelPosts(posts);
+      novelLoaded = true;
+      checkAllLoaded();
+    });
+
+    const unsubCommunity = onSnapshot(communityQ, (snap) => {
+      const posts = snap.docs.map((d) => ({
+        ...(d.data() as Omit<Post, "id">),
+        id: d.id,
+        createdAt:
+          (d.data().createdAt?.toDate?.() ?? new Date()).toISOString(),
+      }));
+      setCommunityPosts(posts);
+      communityLoaded = true;
+      checkAllLoaded();
+    });
+
+    const unsubComments = onSnapshot(commentsQ, (snap) => {
+      const c = snap.docs.map((d) => ({
+        ...(d.data() as Omit<Comment, "id">),
+        id: d.id,
+        createdAt:
+          (d.data().createdAt?.toDate?.() ?? new Date()).toISOString(),
+      }));
+      setComments(c);
+      commentsLoaded = true;
+      checkAllLoaded();
+    });
+
+    return () => {
+      unsubNovel();
+      unsubCommunity();
+      unsubComments();
+    };
+  }, []);
+
+  const loadLocalPosts = async () => {
     setIsLoading(true);
     try {
-      const stored = await getData<Post[]>(STORAGE_KEYS.POSTS);
-      const storedCommunity = await getData<Post[]>(STORAGE_KEYS.COMMUNITY_POSTS);
-      const storedComments = await getData<Comment[]>(STORAGE_KEYS.COMMENTS);
+      const [storedPosts, storedCommunity, storedComments] = await Promise.all([
+        getData<Post[]>(STORAGE_KEYS.POSTS),
+        getData<Post[]>(STORAGE_KEYS.COMMUNITY_POSTS),
+        getData<Comment[]>(STORAGE_KEYS.COMMENTS),
+      ]);
 
-      if (!stored || stored.length === 0) {
+      if (!storedPosts || storedPosts.length === 0) {
         setNovelPosts(MOCK_POSTS);
         await storeData(STORAGE_KEYS.POSTS, MOCK_POSTS);
       } else {
-        setNovelPosts(stored);
+        setNovelPosts(storedPosts);
       }
 
       if (!storedCommunity || storedCommunity.length === 0) {
@@ -69,188 +180,311 @@ export function PostsProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, []);
-
-  useEffect(() => {
-    loadPosts();
-  }, [loadPosts]);
+  };
 
   const toggleLike = useCallback(
-    (postId: string) => {
+    async (postId: string) => {
       if (!user) return;
       const uid = user.id;
 
-      const update = (posts: Post[]) =>
-        posts.map((p) => {
-          if (p.id !== postId) return p;
-          const liked = p.likedBy.includes(uid);
-          return {
-            ...p,
-            likes: liked ? p.likes - 1 : p.likes + 1,
-            likedBy: liked
-              ? p.likedBy.filter((id) => id !== uid)
-              : [...p.likedBy, uid],
-          };
-        });
+      if (!isFirebaseConfigured) {
+        const update = (posts: Post[]) =>
+          posts.map((p) => {
+            if (p.id !== postId) return p;
+            const liked = p.likedBy.includes(uid);
+            return {
+              ...p,
+              likes: liked ? p.likes - 1 : p.likes + 1,
+              likedBy: liked
+                ? p.likedBy.filter((id) => id !== uid)
+                : [...p.likedBy, uid],
+            };
+          });
 
-      const isNovel = novelPosts.some((p) => p.id === postId);
-      if (isNovel) {
+        const isNovel = novelPostIds.current.has(postId);
+        if (isNovel) {
+          setNovelPosts((prev) => {
+            const next = update(prev);
+            storeData(STORAGE_KEYS.POSTS, next);
+            return next;
+          });
+        } else {
+          setCommunityPosts((prev) => {
+            const next = update(prev);
+            storeData(STORAGE_KEYS.COMMUNITY_POSTS, next);
+            return next;
+          });
+        }
+        return;
+      }
+
+      const isNovel = novelPostIds.current.has(postId);
+      const colName = isNovel ? "posts" : "communityPosts";
+      const allPosts = isNovel ? novelPosts : communityPosts;
+      const post = allPosts.find((p) => p.id === postId);
+      if (!post) return;
+
+      const liked = post.likedBy.includes(uid);
+      const postRef = doc(db, colName, postId);
+      await updateDoc(postRef, {
+        likes: increment(liked ? -1 : 1),
+        likedBy: liked ? arrayRemove(uid) : arrayUnion(uid),
+      });
+
+      if (!liked) {
+        const authorRef = doc(db, "users", post.authorId);
+        await updateDoc(authorRef, { likesReceived: increment(1) });
+      }
+    },
+    [user, novelPosts, communityPosts]
+  );
+
+  const toggleSave = useCallback(
+    async (postId: string) => {
+      if (!user) return;
+      const uid = user.id;
+
+      if (!isFirebaseConfigured) {
+        const update = (posts: Post[]) =>
+          posts.map((p) => {
+            if (p.id !== postId) return p;
+            const saved = p.savedBy.includes(uid);
+            return {
+              ...p,
+              savedBy: saved
+                ? p.savedBy.filter((id) => id !== uid)
+                : [...p.savedBy, uid],
+            };
+          });
         setNovelPosts((prev) => {
           const next = update(prev);
           storeData(STORAGE_KEYS.POSTS, next);
           return next;
         });
-      } else {
         setCommunityPosts((prev) => {
           const next = update(prev);
           storeData(STORAGE_KEYS.COMMUNITY_POSTS, next);
           return next;
         });
+        return;
       }
-    },
-    [user, novelPosts]
-  );
 
-  const toggleSave = useCallback(
-    (postId: string) => {
-      if (!user) return;
-      const uid = user.id;
+      const allPosts = [...novelPosts, ...communityPosts];
+      const post = allPosts.find((p) => p.id === postId);
+      if (!post) return;
 
-      const update = (posts: Post[]) =>
-        posts.map((p) => {
-          if (p.id !== postId) return p;
-          const saved = p.savedBy.includes(uid);
-          return {
-            ...p,
-            savedBy: saved
-              ? p.savedBy.filter((id) => id !== uid)
-              : [...p.savedBy, uid],
-          };
-        });
-
-      setNovelPosts((prev) => {
-        const next = update(prev);
-        storeData(STORAGE_KEYS.POSTS, next);
-        return next;
-      });
-      setCommunityPosts((prev) => {
-        const next = update(prev);
-        storeData(STORAGE_KEYS.COMMUNITY_POSTS, next);
-        return next;
+      const isNovel = novelPostIds.current.has(postId);
+      const colName = isNovel ? "posts" : "communityPosts";
+      const postRef = doc(db, colName, postId);
+      const saved = post.savedBy.includes(uid);
+      await updateDoc(postRef, {
+        savedBy: saved ? arrayRemove(uid) : arrayUnion(uid),
       });
     },
-    [user]
+    [user, novelPosts, communityPosts]
   );
 
   const toggleCommentLike = useCallback(
-    (commentId: string) => {
+    async (commentId: string) => {
       if (!user) return;
       const uid = user.id;
-      setComments((prev) => {
-        const next = prev.map((c) => {
-          if (c.id !== commentId) return c;
-          const liked = c.likedBy.includes(uid);
-          return {
-            ...c,
-            likes: liked ? c.likes - 1 : c.likes + 1,
-            likedBy: liked
-              ? c.likedBy.filter((id) => id !== uid)
-              : [...c.likedBy, uid],
-          };
+
+      if (!isFirebaseConfigured) {
+        setComments((prev) => {
+          const next = prev.map((c) => {
+            if (c.id !== commentId) return c;
+            const liked = c.likedBy.includes(uid);
+            return {
+              ...c,
+              likes: liked ? c.likes - 1 : c.likes + 1,
+              likedBy: liked
+                ? c.likedBy.filter((id) => id !== uid)
+                : [...c.likedBy, uid],
+            };
+          });
+          storeData(STORAGE_KEYS.COMMENTS, next);
+          return next;
         });
-        storeData(STORAGE_KEYS.COMMENTS, next);
-        return next;
+        return;
+      }
+
+      const comment = comments.find((c) => c.id === commentId);
+      if (!comment) return;
+      const liked = comment.likedBy.includes(uid);
+      const commentRef = doc(db, "comments", commentId);
+      await updateDoc(commentRef, {
+        likes: increment(liked ? -1 : 1),
+        likedBy: liked ? arrayRemove(uid) : arrayUnion(uid),
       });
     },
-    [user]
+    [user, comments]
   );
 
   const addPost = useCallback(
-    (post: Omit<Post, "id" | "createdAt" | "likes" | "likedBy" | "commentCount" | "savedBy" | "reportedBy">) => {
-      const newPost: Post = {
+    async (
+      post: Omit<
+        Post,
+        | "id"
+        | "createdAt"
+        | "likes"
+        | "likedBy"
+        | "commentCount"
+        | "savedBy"
+        | "reportedBy"
+      >
+    ) => {
+      const newPostData = {
         ...post,
-        id: `post_${Date.now()}`,
-        createdAt: new Date().toISOString(),
         likes: 0,
         likedBy: [],
         commentCount: 0,
         savedBy: [],
         reportedBy: [],
+        createdAt: serverTimestamp(),
       };
-      if (post.type === "novidades") {
+
+      if (!isFirebaseConfigured) {
+        const newPost: Post = {
+          ...post,
+          id: `post_${Date.now()}`,
+          createdAt: new Date().toISOString(),
+          likes: 0,
+          likedBy: [],
+          commentCount: 0,
+          savedBy: [],
+          reportedBy: [],
+        };
+        if (post.type === "novidades") {
+          setNovelPosts((prev) => {
+            const next = [newPost, ...prev];
+            storeData(STORAGE_KEYS.POSTS, next);
+            return next;
+          });
+        } else {
+          setCommunityPosts((prev) => {
+            const next = [newPost, ...prev];
+            storeData(STORAGE_KEYS.COMMUNITY_POSTS, next);
+            return next;
+          });
+        }
+        if (user) {
+          await updateDoc(doc(db, "users", user.id), {
+            postCount: increment(1),
+          }).catch(() => {});
+        }
+        return;
+      }
+
+      const colName =
+        post.type === "novidades" ? "posts" : "communityPosts";
+      await addDoc(collection(db, colName), newPostData);
+
+      if (user) {
+        await updateDoc(doc(db, "users", user.id), {
+          postCount: increment(1),
+        });
+      }
+    },
+    [user]
+  );
+
+  const deletePost = useCallback(
+    async (postId: string) => {
+      if (!isFirebaseConfigured) {
         setNovelPosts((prev) => {
-          const next = [newPost, ...prev];
+          const next = prev.filter((p) => p.id !== postId);
           storeData(STORAGE_KEYS.POSTS, next);
           return next;
         });
-      } else {
         setCommunityPosts((prev) => {
-          const next = [newPost, ...prev];
+          const next = prev.filter((p) => p.id !== postId);
           storeData(STORAGE_KEYS.COMMUNITY_POSTS, next);
           return next;
         });
+        return;
       }
+
+      const isNovel = novelPostIds.current.has(postId);
+      const colName = isNovel ? "posts" : "communityPosts";
+      await deleteDoc(doc(db, colName, postId));
     },
     []
   );
 
-  const deletePost = useCallback((postId: string) => {
-    setNovelPosts((prev) => {
-      const next = prev.filter((p) => p.id !== postId);
-      storeData(STORAGE_KEYS.POSTS, next);
-      return next;
-    });
-    setCommunityPosts((prev) => {
-      const next = prev.filter((p) => p.id !== postId);
-      storeData(STORAGE_KEYS.COMMUNITY_POSTS, next);
-      return next;
-    });
-  }, []);
+  const togglePin = useCallback(
+    async (postId: string) => {
+      if (!isFirebaseConfigured) {
+        setNovelPosts((prev) => {
+          const next = prev.map((p) =>
+            p.id === postId ? { ...p, isPinned: !p.isPinned } : p
+          );
+          storeData(STORAGE_KEYS.POSTS, next);
+          return next;
+        });
+        return;
+      }
 
-  const togglePin = useCallback((postId: string) => {
-    setNovelPosts((prev) => {
-      const next = prev.map((p) =>
-        p.id === postId ? { ...p, isPinned: !p.isPinned } : p
-      );
-      storeData(STORAGE_KEYS.POSTS, next);
-      return next;
-    });
-  }, []);
+      const post = novelPosts.find((p) => p.id === postId);
+      if (!post) return;
+      await updateDoc(doc(db, "posts", postId), {
+        isPinned: !post.isPinned,
+      });
+    },
+    [novelPosts]
+  );
 
   const addComment = useCallback(
-    (comment: Omit<Comment, "id" | "likes" | "likedBy" | "createdAt">) => {
-      const newComment: Comment = {
+    async (
+      comment: Omit<Comment, "id" | "likes" | "likedBy" | "createdAt">
+    ) => {
+      if (!isFirebaseConfigured) {
+        const newComment: Comment = {
+          ...comment,
+          id: `c_${Date.now()}`,
+          createdAt: new Date().toISOString(),
+          likes: 0,
+          likedBy: [],
+        };
+        setComments((prev) => {
+          const next = [...prev, newComment];
+          storeData(STORAGE_KEYS.COMMENTS, next);
+          return next;
+        });
+        const updateCount = (posts: Post[], key: string) => {
+          const next = posts.map((p) =>
+            p.id === comment.postId
+              ? { ...p, commentCount: p.commentCount + 1 }
+              : p
+          );
+          storeData(key, next);
+          return next;
+        };
+        setNovelPosts((prev) =>
+          updateCount(prev, STORAGE_KEYS.POSTS)
+        );
+        setCommunityPosts((prev) =>
+          updateCount(prev, STORAGE_KEYS.COMMUNITY_POSTS)
+        );
+        return;
+      }
+
+      const commentData = {
         ...comment,
-        id: `c_${Date.now()}`,
-        createdAt: new Date().toISOString(),
         likes: 0,
         likedBy: [],
+        createdAt: serverTimestamp(),
       };
+      await addDoc(collection(db, "comments"), commentData);
 
-      setComments((prev) => {
-        const next = [...prev, newComment];
-        storeData(STORAGE_KEYS.COMMENTS, next);
-        return next;
+      const isNovel = novelPostIds.current.has(comment.postId);
+      const colName = isNovel ? "posts" : "communityPosts";
+      await updateDoc(doc(db, colName, comment.postId), {
+        commentCount: increment(1),
       });
 
-      const updateCommentCount = (posts: Post[], key: string) => {
-        const next = posts.map((p) =>
-          p.id === comment.postId
-            ? { ...p, commentCount: p.commentCount + 1 }
-            : p
-        );
-        storeData(key, next);
-        return next;
-      };
-
-      setNovelPosts((prev) => updateCommentCount(prev, STORAGE_KEYS.POSTS));
-      setCommunityPosts((prev) => updateCommentCount(prev, STORAGE_KEYS.COMMUNITY_POSTS));
-
       if (user) {
-        import("@/lib/storage").then(({ getData: gd, storeData: sd, STORAGE_KEYS: sk }) => {
-          gd<any>(sk.USER).then((u) => {
-            if (u) sd(sk.USER, { ...u, commentCount: (u.commentCount || 0) + 1 });
-          });
+        await updateDoc(doc(db, "users", user.id), {
+          commentCount: increment(1),
         });
       }
     },
@@ -264,8 +498,10 @@ export function PostsProvider({ children }: { children: React.ReactNode }) {
   );
 
   const refreshPosts = useCallback(async () => {
-    await loadPosts();
-  }, [loadPosts]);
+    if (!isFirebaseConfigured) {
+      await loadLocalPosts();
+    }
+  }, []);
 
   return (
     <PostsContext.Provider

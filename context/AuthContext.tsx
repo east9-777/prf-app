@@ -1,10 +1,28 @@
 import React, {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useState,
-  useCallback,
 } from "react";
+import {
+  GoogleAuthProvider,
+  onAuthStateChanged,
+  signInWithCredential,
+  signOut as firebaseSignOut,
+} from "firebase/auth";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+  where,
+} from "firebase/firestore";
+import { auth, db, isFirebaseConfigured } from "@/lib/firebase";
 import { getData, removeData, storeData, STORAGE_KEYS } from "@/lib/storage";
 import type { User, UserRole } from "@/lib/types";
 
@@ -12,7 +30,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isLoggedIn: boolean;
-  login: (mockUser?: Partial<User>) => Promise<void>;
+  signInWithGoogle: (accessToken: string) => Promise<void>;
   logout: () => Promise<void>;
   updateUser: (updates: Partial<User>) => Promise<void>;
   isAdmin: () => boolean;
@@ -24,15 +42,70 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const ADMIN_EMAIL = "leivisonbrito64@gmail.com";
+
+function buildDefaultUser(uid: string, email: string, photoURL: string): User {
+  const role: UserRole =
+    email.toLowerCase() === ADMIN_EMAIL.toLowerCase()
+      ? "administrador"
+      : "usuario";
+  return {
+    id: uid,
+    username: "",
+    photoURL,
+    email,
+    role,
+    createdAt: new Date().toISOString(),
+    postCount: 0,
+    commentCount: 0,
+    likesReceived: 0,
+    savedPosts: [],
+    blockedUsers: [],
+    hiddenPosts: [],
+  };
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    loadUser();
+    if (!isFirebaseConfigured) {
+      loadLocalUser();
+      return;
+    }
+
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      try {
+        if (firebaseUser) {
+          const userRef = doc(db, "users", firebaseUser.uid);
+          const snap = await getDoc(userRef);
+          if (snap.exists()) {
+            const data = snap.data() as User;
+            setUser({ ...data, id: firebaseUser.uid });
+            await storeData(STORAGE_KEYS.USER, { ...data, id: firebaseUser.uid });
+          } else {
+            const partial = buildDefaultUser(
+              firebaseUser.uid,
+              firebaseUser.email ?? "",
+              firebaseUser.photoURL ?? ""
+            );
+            setUser(partial);
+            await storeData(STORAGE_KEYS.USER, partial);
+          }
+        } else {
+          setUser(null);
+          await removeData(STORAGE_KEYS.USER);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    });
+
+    return unsubscribe;
   }, []);
 
-  const loadUser = async () => {
+  const loadLocalUser = async () => {
     try {
       const stored = await getData<User>(STORAGE_KEYS.USER);
       if (stored) setUser(stored);
@@ -41,27 +114,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const login = useCallback(async (mockUser?: Partial<User>) => {
-    const defaultUser: User = {
-      id: `user_${Date.now()}`,
-      username: "",
-      photoURL: "",
-      email: "usuario@demo.com",
-      role: "usuario",
-      createdAt: new Date().toISOString(),
-      postCount: 0,
-      commentCount: 0,
-      likesReceived: 0,
-      savedPosts: [],
-      blockedUsers: [],
-      hiddenPosts: [],
-      ...mockUser,
-    };
-    setUser(defaultUser);
-    await storeData(STORAGE_KEYS.USER, defaultUser);
+  const signInWithGoogle = useCallback(async (accessToken: string) => {
+    if (!isFirebaseConfigured) {
+      const demoUser = buildDefaultUser(`demo_${Date.now()}`, "demo@gmail.com", "");
+      setUser(demoUser);
+      await storeData(STORAGE_KEYS.USER, demoUser);
+      return;
+    }
+    const credential = GoogleAuthProvider.credential(null, accessToken);
+    await signInWithCredential(auth, credential);
   }, []);
 
   const logout = useCallback(async () => {
+    if (isFirebaseConfigured) {
+      await firebaseSignOut(auth);
+    }
     await removeData(STORAGE_KEYS.USER);
     setUser(null);
   }, []);
@@ -73,28 +140,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(updated);
       await storeData(STORAGE_KEYS.USER, updated);
 
-      const users = (await getData<User[]>(STORAGE_KEYS.USERS_LIST)) ?? [];
-      const idx = users.findIndex((u) => u.id === user.id);
-      if (idx >= 0) {
-        users[idx] = updated;
-        await storeData(STORAGE_KEYS.USERS_LIST, users);
+      if (isFirebaseConfigured) {
+        const userRef = doc(db, "users", user.id);
+        await updateDoc(userRef, { ...updates });
       }
     },
     [user]
   );
 
-  const registerUser = useCallback(async (newUser: User) => {
-    const users = (await getData<User[]>(STORAGE_KEYS.USERS_LIST)) ?? [];
-    users.push(newUser);
-    await storeData(STORAGE_KEYS.USERS_LIST, users);
-    setUser(newUser);
-    await storeData(STORAGE_KEYS.USER, newUser);
-  }, []);
+  const registerUser = useCallback(
+    async (newUser: User) => {
+      setUser(newUser);
+      await storeData(STORAGE_KEYS.USER, newUser);
+
+      if (isFirebaseConfigured) {
+        const userRef = doc(db, "users", newUser.id);
+        await setDoc(userRef, {
+          ...newUser,
+          createdAt: serverTimestamp(),
+        });
+      } else {
+        const users = (await getData<User[]>(STORAGE_KEYS.USERS_LIST)) ?? [];
+        users.push(newUser);
+        await storeData(STORAGE_KEYS.USERS_LIST, users);
+      }
+    },
+    []
+  );
 
   const checkUsernameAvailable = useCallback(
     async (username: string): Promise<boolean> => {
-      const users = (await getData<User[]>(STORAGE_KEYS.USERS_LIST)) ?? [];
       const normalized = username.toLowerCase().replace("@", "");
+      if (isFirebaseConfigured) {
+        const q = query(
+          collection(db, "users"),
+          where("username", "==", normalized)
+        );
+        const snap = await getDocs(q);
+        return snap.empty || snap.docs[0].id === user?.id;
+      }
+      const users = (await getData<User[]>(STORAGE_KEYS.USERS_LIST)) ?? [];
       return !users.some(
         (u) =>
           u.username.toLowerCase().replace("@", "") === normalized &&
@@ -106,8 +191,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const isAdmin = useCallback(() => user?.role === "administrador", [user]);
   const isInstructor = useCallback(
-    () =>
-      user?.role === "instrutor" || user?.role === "administrador",
+    () => user?.role === "instrutor" || user?.role === "administrador",
     [user]
   );
   const canPost = useCallback(
@@ -115,21 +199,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [user]
   );
 
-  const value: AuthContextType = {
-    user,
-    isLoading,
-    isLoggedIn: !!user && !!user.username,
-    login,
-    logout,
-    updateUser,
-    isAdmin,
-    isInstructor,
-    canPost,
-    checkUsernameAvailable,
-    registerUser,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        isLoading,
+        isLoggedIn: !!user && !!user.username,
+        signInWithGoogle,
+        logout,
+        updateUser,
+        isAdmin,
+        isInstructor,
+        canPost,
+        checkUsernameAvailable,
+        registerUser,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {

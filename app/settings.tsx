@@ -219,8 +219,17 @@ export default function SettingsScreen() {
             icon="info"
             label="Créditos"
             onPress={() => router.push("/credits" as any)}
-            isLast
+            isLast={user?.role !== "administrador"}
           />
+          {user?.role === "administrador" && (
+            <Row
+              icon="shield"
+              label="Painel de Administração"
+              onPress={() => router.push("/admin" as any)}
+              color={colors.primary}
+              isLast
+            />
+          )}
         </Section>
 
         <Section title="DADOS">

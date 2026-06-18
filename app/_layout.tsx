@@ -8,7 +8,10 @@ import {
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import * as Notifications from "expo-notifications";
+import * as ImagePicker from "expo-image-picker";
 import React, { useEffect } from "react";
+import { Alert, Linking, Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -18,6 +21,43 @@ import { PostsProvider } from "@/context/PostsContext";
 
 SplashScreen.preventAutoHideAsync();
 const queryClient = new QueryClient();
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
+
+async function requestPermissions() {
+  if (Platform.OS === "web") return;
+
+  const { status: notifStatus } = await Notifications.getPermissionsAsync();
+  if (notifStatus !== "granted") {
+    const { status } = await Notifications.requestPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert(
+        "Notificações desativadas",
+        "Você pode ativar as notificações a qualquer momento em Configurações > Project P.R.F.",
+        [
+          { text: "Agora não" },
+          {
+            text: "Abrir Configurações",
+            onPress: () => Linking.openSettings(),
+          },
+        ]
+      );
+    }
+  }
+
+  const { status: mediaStatus } = await ImagePicker.getMediaLibraryPermissionsAsync();
+  if (mediaStatus !== "granted") {
+    await ImagePicker.requestMediaLibraryPermissionsAsync();
+  }
+}
 
 function RootLayoutNav() {
   return (
@@ -84,6 +124,7 @@ export default function RootLayout() {
   useEffect(() => {
     if (fontsLoaded || fontError) {
       SplashScreen.hideAsync();
+      requestPermissions();
     }
   }, [fontsLoaded, fontError]);
 
