@@ -1,0 +1,27 @@
+kind = "mobile"
+previewPath = "/"
+title = "Project P.R.F"
+version = "1.0.0"
+id = "artifacts/prf-app"
+router = "expo-domain"
+
+[[integratedSkills]]
+name = "expo"
+version = "1.0.0"
+
+[[services]]
+ensurePreviewReachable = "/status"
+name = "expo"
+paths = [ "/" ]
+localPort = 18849
+
+[services.development]
+run = "pnpm --filter @workspace/prf-app run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/prf-app", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/prf-app", "run", "serve" ]
+
+[services.env]
+PORT = "18849"
+BASE_PATH = "/"
