@@ -23,14 +23,10 @@ jobs:
         with:
           node-version: 22
 
-      - name: Setup EAS (Authentication Only)
-        uses: expo/expo-github-action@v8
-        with:
-          eas-version: none # Evita que a action tente instalar o EAS via yarn/npm
-          token: ${{ secrets.EXPO_TOKEN }}
-
       - name: Install dependencies
         run: pnpm install
 
       - name: Build APK
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: pnpm exec eas build --platform android --profile preview --non-interactive
