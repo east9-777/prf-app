@@ -11,6 +11,7 @@ import {
   View,
 } from "react-native";
 import * as Google from "expo-auth-session/providers/google";
+import { makeRedirectUri } from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -32,10 +33,23 @@ type GoogleBtnProps = {
 
 function GoogleSignInButton({ onSignIn, colors }: GoogleBtnProps) {
   const [loading, setLoading] = useState(false);
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    androidClientId: ANDROID_CLIENT_ID,
-    webClientId: WEB_CLIENT_ID,
-  });
+
+  const redirectUri = makeRedirectUri({ scheme: "project-prf", path: "login" });
+
+  const [request, response, promptAsync] = Google.useAuthRequest(
+    {
+      androidClientId: ANDROID_CLIENT_ID,
+      webClientId: WEB_CLIENT_ID,
+      redirectUri,
+    },
+    { authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth" }
+  );
+
+  useEffect(() => {
+    if (__DEV__) {
+      console.log("[Google OAuth] redirectUri:", redirectUri);
+    }
+  }, [redirectUri]);
 
   useEffect(() => {
     if (response?.type === "success") {
@@ -46,8 +60,13 @@ function GoogleSignInButton({ onSignIn, colors }: GoogleBtnProps) {
         setLoading(false);
         Alert.alert("Erro", "Token do Google não recebido. Tente novamente.");
       }
+    } else if (response?.type === "error") {
+      setLoading(false);
+      Alert.alert(
+        "Erro de autenticação",
+        `Adicione esta URI no Google Cloud Console:\n\n${redirectUri}\n\n(APIs & Services → Credenciais → Web Client → URIs de redirecionamento autorizadas)`
+      );
     } else if (
-      response?.type === "error" ||
       response?.type === "cancel" ||
       response?.type === "dismiss"
     ) {
@@ -59,7 +78,7 @@ function GoogleSignInButton({ onSignIn, colors }: GoogleBtnProps) {
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       setLoading(true);
-      await promptAsync();
+      await promptAsync({ additionalParameters: { prompt: "select_account" } });
     } catch {
       setLoading(false);
       Alert.alert("Erro", "Não foi possível iniciar o login. Tente novamente.");
