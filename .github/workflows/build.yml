@@ -26,6 +26,26 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
+      - name: Sync secrets to EAS
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          sync_env() {
+            local name=$1
+            local value=$2
+            pnpm exec eas env:update --name "$name" --value "$value" --environment preview --non-interactive 2>/dev/null \
+              || pnpm exec eas env:create --scope project --name "$name" --value "$value" --type sensitive --environment preview --non-interactive 2>/dev/null \
+              || true
+          }
+          sync_env "EXPO_PUBLIC_FIREBASE_API_KEY" "${{ secrets.FIREBASE_API_KEY }}"
+          sync_env "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN" "${{ secrets.FIREBASE_AUTH_DOMAIN }}"
+          sync_env "EXPO_PUBLIC_FIREBASE_PROJECT_ID" "${{ secrets.FIREBASE_PROJECT_ID }}"
+          sync_env "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET" "${{ secrets.FIREBASE_STORAGE_BUCKET }}"
+          sync_env "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID" "${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}"
+          sync_env "EXPO_PUBLIC_FIREBASE_APP_ID" "${{ secrets.FIREBASE_APP_ID }}"
+          sync_env "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID" "${{ secrets.GOOGLE_ANDROID_CLIENT_ID }}"
+          sync_env "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID" "${{ secrets.GOOGLE_WEB_CLIENT_ID }}"
+
       - name: Build APK
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
