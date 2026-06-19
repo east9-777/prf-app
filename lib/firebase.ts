@@ -21,17 +21,23 @@ export const isFirebaseConfigured = Boolean(
   firebaseConfig.apiKey && firebaseConfig.projectId
 );
 
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+const app = isFirebaseConfigured
+  ? getApps().length === 0
+    ? initializeApp(firebaseConfig)
+    : getApp()
+  : null;
 
-export const auth = (() => {
-  try {
-    return initializeAuth(app, {
-      persistence: getReactNativePersistence(AsyncStorage),
-    });
-  } catch {
-    return getAuth(app);
-  }
-})();
+export const auth = app
+  ? (() => {
+      try {
+        return initializeAuth(app, {
+          persistence: getReactNativePersistence(AsyncStorage),
+        });
+      } catch {
+        return getAuth(app);
+      }
+    })()
+  : (null as any);
 
-export const db = getFirestore(app);
-export const storage = getStorage(app);
+export const db = app ? getFirestore(app) : (null as any);
+export const storage = app ? getStorage(app) : (null as any);
