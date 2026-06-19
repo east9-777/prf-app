@@ -9,8 +9,10 @@ import {
   GoogleAuthProvider,
   onAuthStateChanged,
   signInWithCredential,
+  signInWithPopup,
   signOut as firebaseSignOut,
 } from "firebase/auth";
+import { Platform } from "react-native";
 import {
   collection,
   doc,
@@ -30,7 +32,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isLoggedIn: boolean;
-  signInWithGoogle: (accessToken: string) => Promise<void>;
+  signInWithGoogle: (accessToken?: string) => Promise<void>;
   logout: () => Promise<void>;
   updateUser: (updates: Partial<User>) => Promise<void>;
   isAdmin: () => boolean;
@@ -114,15 +116,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signInWithGoogle = useCallback(async (accessToken: string) => {
+  const signInWithGoogle = useCallback(async (accessToken?: string) => {
     if (!isFirebaseConfigured) {
       const demoUser = buildDefaultUser(`demo_${Date.now()}`, "demo@gmail.com", "");
       setUser(demoUser);
       await storeData(STORAGE_KEYS.USER, demoUser);
       return;
     }
-    const credential = GoogleAuthProvider.credential(null, accessToken);
-    await signInWithCredential(auth, credential);
+
+    if (Platform.OS === "web") {
+      const provider = new GoogleAuthProvider();
+      provider.addScope("email");
+      provider.addScope("profile");
+      provider.setCustomParameters({ prompt: "select_account" });
+      await signInWithPopup(auth, provider);
+      // onAuthStateChanged handles the rest
+    } else if (accessToken) {
+      const credential = GoogleAuthProvider.credential(null, accessToken);
+      await signInWithCredential(auth, credential);
+    } else {
+      throw new Error("ACCESS_TOKEN_REQUIRED");
+    }
   }, []);
 
   const logout = useCallback(async () => {

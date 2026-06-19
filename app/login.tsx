@@ -11,11 +11,9 @@ import {
   View,
 } from "react-native";
 import * as Google from "expo-auth-session/providers/google";
-import { makeRedirectUri } from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "@/context/AuthContext";
 import { useColors } from "@/hooks/useColors";
@@ -24,52 +22,76 @@ WebBrowser.maybeCompleteAuthSession();
 
 const ANDROID_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ?? "";
 const WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? "";
-const GOOGLE_CONFIGURED = Boolean(ANDROID_CLIENT_ID && WEB_CLIENT_ID);
 
-type GoogleBtnProps = {
-  onSignIn: (accessToken: string) => Promise<void>;
-  colors: ReturnType<typeof useColors>;
-};
+type BtnProps = { colors: ReturnType<typeof useColors> };
 
-function GoogleSignInButton({ onSignIn, colors }: GoogleBtnProps) {
+// --- Botão para WEB: usa signInWithPopup do Firebase (não precisa de proxy) ---
+function WebGoogleButton({ colors, onSignIn }: BtnProps & { onSignIn: () => Promise<void> }) {
   const [loading, setLoading] = useState(false);
 
-  const redirectUri = makeRedirectUri({ scheme: "project-prf", path: "login" });
-
-  const [request, response, promptAsync] = Google.useAuthRequest(
-    {
-      androidClientId: ANDROID_CLIENT_ID,
-      webClientId: WEB_CLIENT_ID,
-      redirectUri,
-    },
-    { authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth" }
-  );
-
-  useEffect(() => {
-    if (__DEV__) {
-      console.log("[Google OAuth] redirectUri:", redirectUri);
+  const handlePress = async () => {
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      setLoading(true);
+      await onSignIn();
+    } catch (err: any) {
+      Alert.alert("Erro ao entrar", err?.message ?? "Tente novamente.");
+    } finally {
+      setLoading(false);
     }
-  }, [redirectUri]);
+  };
+
+  return (
+    <Pressable
+      style={({ pressed }) => [
+        styles.googleBtn,
+        { backgroundColor: colors.card, borderColor: colors.border, opacity: pressed ? 0.85 : 1 },
+      ]}
+      onPress={handlePress}
+      disabled={loading}
+    >
+      {loading ? (
+        <ActivityIndicator color={colors.primary} size="small" />
+      ) : (
+        <>
+          <View style={styles.googleIconWrapper}>
+            <Text style={styles.googleIconG}>G</Text>
+          </View>
+          <Text style={[styles.googleText, { color: colors.text }]}>
+            Entrar com Google
+          </Text>
+        </>
+      )}
+    </Pressable>
+  );
+}
+
+// --- Botão para NATIVO (Android/iOS): usa expo-auth-session ---
+function NativeGoogleButton({ colors, onSignIn }: BtnProps & { onSignIn: (token: string) => Promise<void> }) {
+  const [loading, setLoading] = useState(false);
+
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    androidClientId: ANDROID_CLIENT_ID,
+    webClientId: WEB_CLIENT_ID,
+  });
 
   useEffect(() => {
     if (response?.type === "success") {
-      const accessToken = response.authentication?.accessToken;
-      if (accessToken) {
-        onSignIn(accessToken).finally(() => setLoading(false));
+      const token = response.authentication?.accessToken;
+      if (token) {
+        onSignIn(token).finally(() => setLoading(false));
       } else {
         setLoading(false);
-        Alert.alert("Erro", "Token do Google não recebido. Tente novamente.");
+        Alert.alert("Erro", "Token não recebido. Tente novamente.");
       }
     } else if (response?.type === "error") {
       setLoading(false);
       Alert.alert(
-        "Erro de autenticação",
-        `Adicione esta URI no Google Cloud Console:\n\n${redirectUri}\n\n(APIs & Services → Credenciais → Web Client → URIs de redirecionamento autorizadas)`
+        "Acesso bloqueado pelo Google",
+        "O Expo Go não é mais suportado para login com Google. Para usar o app no celular, instale o APK gerado pelo EAS Build.",
+        [{ text: "Entendi" }]
       );
-    } else if (
-      response?.type === "cancel" ||
-      response?.type === "dismiss"
-    ) {
+    } else if (response?.type === "cancel" || response?.type === "dismiss") {
       setLoading(false);
     }
   }, [response]);
@@ -81,7 +103,7 @@ function GoogleSignInButton({ onSignIn, colors }: GoogleBtnProps) {
       await promptAsync({ additionalParameters: { prompt: "select_account" } });
     } catch {
       setLoading(false);
-      Alert.alert("Erro", "Não foi possível iniciar o login. Tente novamente.");
+      Alert.alert("Erro", "Não foi possível iniciar o login.");
     }
   };
 
@@ -89,11 +111,7 @@ function GoogleSignInButton({ onSignIn, colors }: GoogleBtnProps) {
     <Pressable
       style={({ pressed }) => [
         styles.googleBtn,
-        {
-          backgroundColor: colors.card,
-          borderColor: colors.border,
-          opacity: pressed ? 0.85 : 1,
-        },
+        { backgroundColor: colors.card, borderColor: colors.border, opacity: pressed ? 0.85 : 1 },
       ]}
       onPress={handlePress}
       disabled={loading || !request}
@@ -114,50 +132,21 @@ function GoogleSignInButton({ onSignIn, colors }: GoogleBtnProps) {
   );
 }
 
-function GoogleNotConfiguredButton({ colors }: { colors: ReturnType<typeof useColors> }) {
-  const handlePress = () => {
-    Alert.alert(
-      "Configuração necessária",
-      "As credenciais do Google OAuth ainda não foram configuradas. Configure EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID e EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID.",
-      [{ text: "OK" }]
-    );
-  };
-
-  return (
-    <Pressable
-      style={({ pressed }) => [
-        styles.googleBtn,
-        {
-          backgroundColor: colors.card,
-          borderColor: colors.border,
-          opacity: pressed ? 0.85 : 1,
-        },
-      ]}
-      onPress={handlePress}
-    >
-      <View style={styles.googleIconWrapper}>
-        <Text style={styles.googleIconG}>G</Text>
-      </View>
-      <Text style={[styles.googleText, { color: colors.text }]}>
-        Entrar com Google
-      </Text>
-    </Pressable>
-  );
-}
-
+// --- Tela principal de login ---
 export default function LoginScreen() {
   const colors = useColors();
   const { signInWithGoogle } = useAuth();
   const insets = useSafeAreaInsets();
 
-  const handleSignIn = async (accessToken: string) => {
+  const handleWebSignIn = async () => {
+    await signInWithGoogle();
+  };
+
+  const handleNativeSignIn = async (accessToken: string) => {
     try {
       await signInWithGoogle(accessToken);
     } catch {
-      Alert.alert(
-        "Erro ao entrar",
-        "Não foi possível autenticar com o Google. Verifique sua conexão e tente novamente."
-      );
+      Alert.alert("Erro ao entrar", "Não foi possível autenticar. Tente novamente.");
     }
   };
 
@@ -184,9 +173,7 @@ export default function LoginScreen() {
 
       <View style={styles.bottomSection}>
         <View style={styles.textSection}>
-          <Text style={[styles.title, { color: colors.text }]}>
-            Project P.R.F
-          </Text>
+          <Text style={[styles.title, { color: colors.text }]}>Project P.R.F</Text>
           <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
             Preparatório completo para o concurso da Polícia Rodoviária Federal
           </Text>
@@ -208,15 +195,14 @@ export default function LoginScreen() {
           ))}
         </View>
 
-        {GOOGLE_CONFIGURED ? (
-          <GoogleSignInButton onSignIn={handleSignIn} colors={colors} />
+        {Platform.OS === "web" ? (
+          <WebGoogleButton colors={colors} onSignIn={handleWebSignIn} />
         ) : (
-          <GoogleNotConfiguredButton colors={colors} />
+          <NativeGoogleButton colors={colors} onSignIn={handleNativeSignIn} />
         )}
 
         <Text style={[styles.disclaimer, { color: colors.mutedForeground }]}>
-          Ao entrar, você concorda com os termos de uso e política de privacidade
-          do Project P.R.F
+          Ao entrar, você concorda com os termos de uso e política de privacidade do Project P.R.F
         </Text>
       </View>
     </View>
@@ -225,25 +211,12 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: "space-between" },
-  logoSection: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingTop: 40,
-  },
+  logoSection: { flex: 1, alignItems: "center", justifyContent: "center", paddingTop: 40 },
   logo: { width: 200, height: 240 },
   bottomSection: { padding: 28, gap: 24 },
   textSection: { gap: 8 },
-  title: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 30,
-    letterSpacing: -0.5,
-  },
-  subtitle: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 15,
-    lineHeight: 22,
-  },
+  title: { fontFamily: "Inter_700Bold", fontSize: 30, letterSpacing: -0.5 },
+  subtitle: { fontFamily: "Inter_400Regular", fontSize: 15, lineHeight: 22 },
   features: { gap: 10 },
   featureItem: { flexDirection: "row", alignItems: "center", gap: 12 },
   featureText: { fontFamily: "Inter_400Regular", fontSize: 14 },
@@ -257,22 +230,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     minHeight: 56,
   },
-  googleIconWrapper: {
-    width: 24,
-    height: 24,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  googleIconG: {
-    fontSize: 20,
-    fontFamily: "Inter_700Bold",
-    color: "#4285F4",
-  },
+  googleIconWrapper: { width: 24, height: 24, alignItems: "center", justifyContent: "center" },
+  googleIconG: { fontSize: 20, fontFamily: "Inter_700Bold", color: "#4285F4" },
   googleText: { fontFamily: "Inter_600SemiBold", fontSize: 16 },
-  disclaimer: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 11,
-    textAlign: "center",
-    lineHeight: 16,
-  },
+  disclaimer: { fontFamily: "Inter_400Regular", fontSize: 11, textAlign: "center", lineHeight: 16 },
 });
