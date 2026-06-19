@@ -21,27 +21,27 @@ import { useColors } from "@/hooks/useColors";
 
 WebBrowser.maybeCompleteAuthSession();
 
-const ANDROID_CLIENT_ID =
-  process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ?? "";
+const ANDROID_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ?? "";
 const WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? "";
+const GOOGLE_CONFIGURED = Boolean(ANDROID_CLIENT_ID && WEB_CLIENT_ID);
 
-export default function LoginScreen() {
-  const colors = useColors();
-  const { signInWithGoogle } = useAuth();
-  const router = useRouter();
-  const insets = useSafeAreaInsets();
+type GoogleBtnProps = {
+  onSignIn: (accessToken: string) => Promise<void>;
+  colors: ReturnType<typeof useColors>;
+};
+
+function GoogleSignInButton({ onSignIn, colors }: GoogleBtnProps) {
   const [loading, setLoading] = useState(false);
-
   const [request, response, promptAsync] = Google.useAuthRequest({
-    androidClientId: ANDROID_CLIENT_ID || undefined,
-    webClientId: WEB_CLIENT_ID || undefined,
+    androidClientId: ANDROID_CLIENT_ID,
+    webClientId: WEB_CLIENT_ID,
   });
 
   useEffect(() => {
     if (response?.type === "success") {
       const accessToken = response.authentication?.accessToken;
       if (accessToken) {
-        handleFirebaseSignIn(accessToken);
+        onSignIn(accessToken).finally(() => setLoading(false));
       } else {
         setLoading(false);
         Alert.alert("Erro", "Token do Google não recebido. Tente novamente.");
@@ -55,36 +55,90 @@ export default function LoginScreen() {
     }
   }, [response]);
 
-  const handleFirebaseSignIn = async (accessToken: string) => {
-    try {
-      await signInWithGoogle(accessToken);
-    } catch (err: any) {
-      setLoading(false);
-      Alert.alert(
-        "Erro ao entrar",
-        "Não foi possível autenticar com o Google. Verifique sua conexão e tente novamente."
-      );
-    }
-  };
-
-  const handleGoogleSignIn = async () => {
+  const handlePress = async () => {
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       setLoading(true);
-
-      if (!ANDROID_CLIENT_ID && !WEB_CLIENT_ID) {
-        Alert.alert(
-          "Configuração necessária",
-          "As credenciais do Google OAuth ainda não foram configuradas. Adicione EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID e EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID nas variáveis de ambiente.",
-          [{ text: "OK", onPress: () => setLoading(false) }]
-        );
-        return;
-      }
-
       await promptAsync();
     } catch {
       setLoading(false);
       Alert.alert("Erro", "Não foi possível iniciar o login. Tente novamente.");
+    }
+  };
+
+  return (
+    <Pressable
+      style={({ pressed }) => [
+        styles.googleBtn,
+        {
+          backgroundColor: colors.card,
+          borderColor: colors.border,
+          opacity: pressed ? 0.85 : 1,
+        },
+      ]}
+      onPress={handlePress}
+      disabled={loading || !request}
+    >
+      {loading ? (
+        <ActivityIndicator color={colors.primary} size="small" />
+      ) : (
+        <>
+          <View style={styles.googleIconWrapper}>
+            <Text style={styles.googleIconG}>G</Text>
+          </View>
+          <Text style={[styles.googleText, { color: colors.text }]}>
+            Entrar com Google
+          </Text>
+        </>
+      )}
+    </Pressable>
+  );
+}
+
+function GoogleNotConfiguredButton({ colors }: { colors: ReturnType<typeof useColors> }) {
+  const handlePress = () => {
+    Alert.alert(
+      "Configuração necessária",
+      "As credenciais do Google OAuth ainda não foram configuradas. Configure EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID e EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID.",
+      [{ text: "OK" }]
+    );
+  };
+
+  return (
+    <Pressable
+      style={({ pressed }) => [
+        styles.googleBtn,
+        {
+          backgroundColor: colors.card,
+          borderColor: colors.border,
+          opacity: pressed ? 0.85 : 1,
+        },
+      ]}
+      onPress={handlePress}
+    >
+      <View style={styles.googleIconWrapper}>
+        <Text style={styles.googleIconG}>G</Text>
+      </View>
+      <Text style={[styles.googleText, { color: colors.text }]}>
+        Entrar com Google
+      </Text>
+    </Pressable>
+  );
+}
+
+export default function LoginScreen() {
+  const colors = useColors();
+  const { signInWithGoogle } = useAuth();
+  const insets = useSafeAreaInsets();
+
+  const handleSignIn = async (accessToken: string) => {
+    try {
+      await signInWithGoogle(accessToken);
+    } catch {
+      Alert.alert(
+        "Erro ao entrar",
+        "Não foi possível autenticar com o Google. Verifique sua conexão e tente novamente."
+      );
     }
   };
 
@@ -121,50 +175,25 @@ export default function LoginScreen() {
 
         <View style={styles.features}>
           {[
-            {
-              icon: "book-open" as const,
-              text: "Materiais e estudos organizados",
-            },
+            { icon: "book-open" as const, text: "Materiais e estudos organizados" },
             { icon: "clipboard" as const, text: "Simulados com questões reais" },
             { icon: "users" as const, text: "Comunidade de candidatos" },
             { icon: "trending-up" as const, text: "Acompanhe seu progresso" },
           ].map((f) => (
             <View key={f.text} style={styles.featureItem}>
               <Feather name={f.icon} size={16} color={colors.primary} />
-              <Text
-                style={[styles.featureText, { color: colors.mutedForeground }]}
-              >
+              <Text style={[styles.featureText, { color: colors.mutedForeground }]}>
                 {f.text}
               </Text>
             </View>
           ))}
         </View>
 
-        <Pressable
-          style={({ pressed }) => [
-            styles.googleBtn,
-            {
-              backgroundColor: colors.card,
-              borderColor: colors.border,
-              opacity: pressed ? 0.85 : 1,
-            },
-          ]}
-          onPress={handleGoogleSignIn}
-          disabled={loading || !request}
-        >
-          {loading ? (
-            <ActivityIndicator color={colors.primary} size="small" />
-          ) : (
-            <>
-              <View style={styles.googleIconWrapper}>
-                <Text style={[styles.googleIconG]}>G</Text>
-              </View>
-              <Text style={[styles.googleText, { color: colors.text }]}>
-                Entrar com Google
-              </Text>
-            </>
-          )}
-        </Pressable>
+        {GOOGLE_CONFIGURED ? (
+          <GoogleSignInButton onSignIn={handleSignIn} colors={colors} />
+        ) : (
+          <GoogleNotConfiguredButton colors={colors} />
+        )}
 
         <Text style={[styles.disclaimer, { color: colors.mutedForeground }]}>
           Ao entrar, você concorda com os termos de uso e política de privacidade
