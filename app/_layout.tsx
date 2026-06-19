@@ -13,7 +13,6 @@ import * as ImagePicker from "expo-image-picker";
 import React, { useEffect } from "react";
 import { Alert, Linking, Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/context/AuthContext";
@@ -135,13 +134,11 @@ export default function RootLayout() {
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
           <GestureHandlerRootView>
-            <KeyboardProvider>
               <AuthProvider>
                 <PostsProvider>
                   <RootLayoutNav />
                 </PostsProvider>
               </AuthProvider>
-            </KeyboardProvider>
           </GestureHandlerRootView>
         </QueryClientProvider>
       </ErrorBoundary>
