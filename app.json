@@ -9,7 +9,7 @@
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/icon.png",
+      "image": "./assets/images/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#0D1117"
     },
@@ -17,8 +17,8 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.leivison.prfapp",
       "infoPlist": {
-        "NSPhotoLibraryUsageDescription": "Precisamos de acesso à sua galeria para você escolher uma foto de perfil.",
-        "NSCameraUsageDescription": "Usamos a câmera para capturar sua foto de perfil."
+        "NSPhotoLibraryUsageDescription": "Precisamos de acesso \u00e0 sua galeria para voc\u00ea escolher uma foto de perfil.",
+        "NSCameraUsageDescription": "Usamos a c\u00e2mera para capturar sua foto de perfil."
       }
     },
     "android": {
@@ -56,7 +56,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Precisamos de acesso à sua galeria para você escolher uma foto de perfil."
+          "photosPermission": "Precisamos de acesso \u00e0 sua galeria para voc\u00ea escolher uma foto de perfil."
         }
       ]
     ],
