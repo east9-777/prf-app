@@ -132,10 +132,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await signInWithPopup(auth, provider);
       // onAuthStateChanged handles the rest
     } else if (accessToken) {
-      const credential = GoogleAuthProvider.credential(null, accessToken);
+      // accessToken aqui é na verdade o idToken vindo do @react-native-google-signin
+      const credential = GoogleAuthProvider.credential(accessToken, null);
       await signInWithCredential(auth, credential);
     } else {
-      throw new Error("ACCESS_TOKEN_REQUIRED");
+      throw new Error("ID_TOKEN_REQUIRED");
     }
   }, []);
 

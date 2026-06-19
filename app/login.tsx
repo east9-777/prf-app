@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -10,7 +10,6 @@ import {
   Text,
   View,
 } from "react-native";
-import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -20,12 +19,9 @@ import { useColors } from "@/hooks/useColors";
 
 WebBrowser.maybeCompleteAuthSession();
 
-const ANDROID_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ?? "";
-const WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? "";
-
 type BtnProps = { colors: ReturnType<typeof useColors> };
 
-// --- Botão para WEB: usa signInWithPopup do Firebase (não precisa de proxy) ---
+// --- Botão para WEB: usa signInWithPopup do Firebase ---
 function WebGoogleButton({ colors, onSignIn }: BtnProps & { onSignIn: () => Promise<void> }) {
   const [loading, setLoading] = useState(false);
 
@@ -66,44 +62,35 @@ function WebGoogleButton({ colors, onSignIn }: BtnProps & { onSignIn: () => Prom
   );
 }
 
-// --- Botão para NATIVO (Android/iOS): usa expo-auth-session ---
-function NativeGoogleButton({ colors, onSignIn }: BtnProps & { onSignIn: (token: string) => Promise<void> }) {
+// --- Botão para NATIVO: usa SDK nativo do Google (sem browser, sem redirect URI) ---
+function NativeGoogleButton({ colors, onSignIn }: BtnProps & { onSignIn: (idToken: string) => Promise<void> }) {
   const [loading, setLoading] = useState(false);
-
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    androidClientId: ANDROID_CLIENT_ID,
-    webClientId: WEB_CLIENT_ID,
-  });
-
-  useEffect(() => {
-    if (response?.type === "success") {
-      const token = response.authentication?.accessToken;
-      if (token) {
-        onSignIn(token).finally(() => setLoading(false));
-      } else {
-        setLoading(false);
-        Alert.alert("Erro", "Token não recebido. Tente novamente.");
-      }
-    } else if (response?.type === "error") {
-      setLoading(false);
-      Alert.alert(
-        "Acesso bloqueado pelo Google",
-        "O Expo Go não é mais suportado para login com Google. Para usar o app no celular, instale o APK gerado pelo EAS Build.",
-        [{ text: "Entendi" }]
-      );
-    } else if (response?.type === "cancel" || response?.type === "dismiss") {
-      setLoading(false);
-    }
-  }, [response]);
 
   const handlePress = async () => {
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       setLoading(true);
-      await promptAsync({ additionalParameters: { prompt: "select_account" } });
-    } catch {
+
+      const { GoogleSignin } = await import("@react-native-google-signin/google-signin");
+
+      GoogleSignin.configure({
+        webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+        scopes: ["email", "profile"],
+      });
+
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+      const response = await GoogleSignin.signIn();
+
+      const idToken = response.data?.idToken ?? (response as any).idToken;
+      if (!idToken) throw new Error("ID token não recebido.");
+
+      await onSignIn(idToken);
+    } catch (err: any) {
+      if (err?.code !== "SIGN_IN_CANCELLED" && err?.code !== -5) {
+        Alert.alert("Erro ao entrar", err?.message ?? "Tente novamente.");
+      }
+    } finally {
       setLoading(false);
-      Alert.alert("Erro", "Não foi possível iniciar o login.");
     }
   };
 
@@ -114,7 +101,7 @@ function NativeGoogleButton({ colors, onSignIn }: BtnProps & { onSignIn: (token:
         { backgroundColor: colors.card, borderColor: colors.border, opacity: pressed ? 0.85 : 1 },
       ]}
       onPress={handlePress}
-      disabled={loading || !request}
+      disabled={loading}
     >
       {loading ? (
         <ActivityIndicator color={colors.primary} size="small" />
@@ -142,9 +129,9 @@ export default function LoginScreen() {
     await signInWithGoogle();
   };
 
-  const handleNativeSignIn = async (accessToken: string) => {
+  const handleNativeSignIn = async (idToken: string) => {
     try {
-      await signInWithGoogle(accessToken);
+      await signInWithGoogle(idToken);
     } catch {
       Alert.alert("Erro ao entrar", "Não foi possível autenticar. Tente novamente.");
     }

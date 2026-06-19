@@ -23,4 +23,13 @@ process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID =
   process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ||
   "306782378347-7e1jim9fi1g63ctq8r8f6bq054n4kamm.apps.googleusercontent.com";
 
-module.exports = appJson;
+module.exports = {
+  ...appJson,
+  expo: {
+    ...appJson.expo,
+    plugins: [
+      ...(appJson.expo.plugins || []),
+      "@react-native-google-signin/google-signin",
+    ],
+  },
+};
