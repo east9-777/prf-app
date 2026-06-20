@@ -377,7 +377,10 @@ export function PostsProvider({ children }: { children: React.ReactNode }) {
 
       const colName =
         post.type === "novidades" ? "posts" : "communityPosts";
-      await addDoc(collection(db, colName), newPostData);
+      const cleanData = Object.fromEntries(
+        Object.entries(newPostData).filter(([, v]) => v !== undefined)
+      );
+      await addDoc(collection(db, colName), cleanData);
 
       if (user) {
         await updateDoc(doc(db, "users", user.id), {
