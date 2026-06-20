@@ -49,7 +49,7 @@ interface PostsContextType {
       | "savedBy"
       | "reportedBy"
     >
-  ) => void;
+  ) => Promise<void>;
   deletePost: (postId: string) => void;
   togglePin: (postId: string) => void;
   addComment: (

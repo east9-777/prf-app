@@ -17,9 +17,11 @@ import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { useAuth } from "@/context/AuthContext";
 import { usePosts } from "@/context/PostsContext";
 import { useColors } from "@/hooks/useColors";
+import { storage, isFirebaseConfigured } from "@/lib/firebase";
 
 export default function CreatePostScreen() {
   const colors = useColors();
@@ -51,6 +53,16 @@ export default function CreatePostScreen() {
     }
   };
 
+  const uploadImage = async (localUri: string): Promise<string> => {
+    if (!isFirebaseConfigured) return localUri;
+    const response = await fetch(localUri);
+    const blob = await response.blob();
+    const filename = `posts/${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
+    const storageRef = ref(storage, filename);
+    await uploadBytes(storageRef, blob);
+    return await getDownloadURL(storageRef);
+  };
+
   const handlePublish = async () => {
     if (!title.trim()) return;
     if (!user) return;
@@ -62,22 +74,28 @@ export default function CreatePostScreen() {
     try {
       setPublishing(true);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      await new Promise((r) => setTimeout(r, 600));
 
-      addPost({
+      let finalImageURL: string | undefined;
+      if (imageURI) {
+        finalImageURL = await uploadImage(imageURI);
+      }
+
+      await addPost({
         authorId: user.id,
         authorName: user.role === "usuario" ? `@${user.username}` : `${user.username}`,
         authorPhoto: user.photoURL,
         authorRole: user.role,
         title: title.trim(),
         text: text.trim() || undefined,
-        imageURL: imageURI || undefined,
+        imageURL: finalImageURL,
         isPinned: false,
         type: postType,
       });
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.back();
+    } catch (err: any) {
+      Alert.alert("Erro ao publicar", err?.message ?? "Não foi possível publicar. Tente novamente.");
     } finally {
       setPublishing(false);
     }

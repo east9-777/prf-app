@@ -84,8 +84,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const snap = await getDoc(userRef);
           if (snap.exists()) {
             const data = snap.data() as User;
-            setUser({ ...data, id: firebaseUser.uid });
-            await storeData(STORAGE_KEYS.USER, { ...data, id: firebaseUser.uid });
+            const email = (data.email || firebaseUser.email || "").toLowerCase();
+            const correctRole: UserRole =
+              email === ADMIN_EMAIL.toLowerCase() ? "administrador" : data.role;
+            const updatedUser = { ...data, id: firebaseUser.uid, role: correctRole };
+            if (correctRole !== data.role) {
+              await updateDoc(userRef, { role: correctRole });
+            }
+            setUser(updatedUser);
+            await storeData(STORAGE_KEYS.USER, updatedUser);
           } else {
             const partial = buildDefaultUser(
               firebaseUser.uid,
