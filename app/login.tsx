@@ -75,6 +75,8 @@ function NativeGoogleButton({ colors, onSignIn }: BtnProps & { onSignIn: (idToke
 
       GoogleSignin.configure({
         webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+        androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
+        offlineAccess: false,
         scopes: ["email", "profile"],
       });
 
@@ -130,11 +132,7 @@ export default function LoginScreen() {
   };
 
   const handleNativeSignIn = async (idToken: string) => {
-    try {
-      await signInWithGoogle(idToken);
-    } catch {
-      Alert.alert("Erro ao entrar", "Não foi possível autenticar. Tente novamente.");
-    }
+    await signInWithGoogle(idToken);
   };
 
   return (
