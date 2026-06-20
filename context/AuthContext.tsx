@@ -88,11 +88,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const correctRole: UserRole =
               email === ADMIN_EMAIL.toLowerCase() ? "administrador" : data.role;
             const updatedUser = { ...data, id: firebaseUser.uid, role: correctRole };
-            if (correctRole !== data.role) {
-              await updateDoc(userRef, { role: correctRole });
-            }
             setUser(updatedUser);
             await storeData(STORAGE_KEYS.USER, updatedUser);
+            if (correctRole !== data.role) {
+              updateDoc(userRef, { role: correctRole }).catch(() => {});
+            }
           } else {
             const partial = buildDefaultUser(
               firebaseUser.uid,
