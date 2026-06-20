@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -13,6 +13,7 @@ import {
 import * as WebBrowser from "expo-web-browser";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "@/context/AuthContext";
 import { useColors } from "@/hooks/useColors";
@@ -124,8 +125,19 @@ function NativeGoogleButton({ colors, onSignIn }: BtnProps & { onSignIn: (idToke
 // --- Tela principal de login ---
 export default function LoginScreen() {
   const colors = useColors();
-  const { signInWithGoogle } = useAuth();
+  const { signInWithGoogle, user } = useAuth();
   const insets = useSafeAreaInsets();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (user) {
+      if (user.username) {
+        router.replace("/(tabs)");
+      } else {
+        router.replace("/setup-username");
+      }
+    }
+  }, [user]);
 
   const handleWebSignIn = async () => {
     await signInWithGoogle();
