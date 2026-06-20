@@ -124,9 +124,10 @@ export function PostCard({ post, onLike, onSave, showMenu, onMenu }: PostCardPro
       <View style={styles.actions}>
         <TouchableOpacity style={styles.action} onPress={handleLike}>
           <Feather
-            name="heart"
+            name={isLiked ? "heart" : "heart"}
             size={17}
             color={isLiked ? "#F85149" : colors.mutedForeground}
+            style={isLiked ? { opacity: 1 } : undefined}
           />
           <Text
             style={[
@@ -151,9 +152,10 @@ export function PostCard({ post, onLike, onSave, showMenu, onMenu }: PostCardPro
 
         <TouchableOpacity style={styles.action} onPress={handleSave}>
           <Feather
-            name={isSaved ? "bookmark" : "bookmark"}
+            name="bookmark"
             size={17}
             color={isSaved ? colors.primary : colors.mutedForeground}
+            style={isSaved ? styles.savedIcon : undefined}
           />
         </TouchableOpacity>
       </View>
@@ -246,5 +248,8 @@ const styles = StyleSheet.create({
   actionText: {
     fontFamily: "Inter_500Medium",
     fontSize: 12,
+  },
+  savedIcon: {
+    opacity: 1,
   },
 });

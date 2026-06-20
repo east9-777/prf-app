@@ -53,14 +53,18 @@ export default function CreatePostScreen() {
     }
   };
 
-  const uploadImage = async (localUri: string): Promise<string> => {
-    if (!isFirebaseConfigured) return localUri;
-    const response = await fetch(localUri);
-    const blob = await response.blob();
-    const filename = `posts/${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
-    const storageRef = ref(storage, filename);
-    await uploadBytes(storageRef, blob);
-    return await getDownloadURL(storageRef);
+  const uploadImage = async (localUri: string): Promise<string | undefined> => {
+    if (!isFirebaseConfigured || !storage) return undefined;
+    try {
+      const response = await fetch(localUri);
+      const blob = await response.blob();
+      const filename = `posts/${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
+      const storageRef = ref(storage, filename);
+      await uploadBytes(storageRef, blob);
+      return await getDownloadURL(storageRef);
+    } catch {
+      return undefined;
+    }
   };
 
   const handlePublish = async () => {

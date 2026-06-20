@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import {
-  FlatList,
+  ActivityIndicator,
+  Alert,
   Platform,
   ScrollView,
   StyleSheet,
@@ -10,6 +11,7 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import * as ImagePicker from "expo-image-picker";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Avatar } from "@/components/Avatar";
 import { PostCard } from "@/components/PostCard";
@@ -24,11 +26,38 @@ type ProfileTab = "posts" | "salvos" | "sobre";
 
 export default function PerfilScreen() {
   const colors = useColors();
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const { novelPosts, communityPosts, toggleLike, toggleSave } = usePosts();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState<ProfileTab>("posts");
+  const [changingPhoto, setChangingPhoto] = useState(false);
+
+  const handleChangePhoto = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permissão necessária", "Precisamos de acesso à sua galeria para trocar a foto.");
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.25,
+      base64: true,
+    });
+    if (!result.canceled && result.assets[0]?.base64) {
+      try {
+        setChangingPhoto(true);
+        const dataUri = `data:image/jpeg;base64,${result.assets[0].base64}`;
+        await updateUser({ photoURL: dataUri });
+      } catch {
+        Alert.alert("Erro", "Não foi possível trocar a foto. Tente novamente.");
+      } finally {
+        setChangingPhoto(false);
+      }
+    }
+  };
 
   const allPosts = useMemo(
     () => [...novelPosts, ...communityPosts],
@@ -69,11 +98,15 @@ export default function PerfilScreen() {
           ]}
         >
           <View style={styles.avatarRow}>
-            <Avatar
-              uri={user?.photoURL}
-              name={user?.username}
-              size="xl"
-            />
+            <TouchableOpacity onPress={handleChangePhoto} disabled={changingPhoto} style={styles.avatarWrapper}>
+              <Avatar uri={user?.photoURL} name={user?.username} size="xl" />
+              <View style={[styles.cameraOverlay, { backgroundColor: colors.primary }]}>
+                {changingPhoto
+                  ? <ActivityIndicator size="small" color="#fff" />
+                  : <Feather name="camera" size={14} color="#fff" />
+                }
+              </View>
+            </TouchableOpacity>
             <TouchableOpacity
               style={[styles.editBtn, { borderColor: colors.border }]}
               onPress={() => router.push("/settings" as any)}
@@ -197,6 +230,21 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     justifyContent: "space-between",
+  },
+  avatarWrapper: {
+    position: "relative",
+  },
+  cameraOverlay: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: "#0D1117",
   },
   editBtn: {
     flexDirection: "row",

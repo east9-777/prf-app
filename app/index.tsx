@@ -1,27 +1,48 @@
 import { Redirect } from "expo-router";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, Image, StyleSheet, Text, View } from "react-native";
 import { useAuth } from "@/context/AuthContext";
-import { useColors } from "@/hooks/useColors";
 
 export default function Index() {
   const { user, isLoading } = useAuth();
-  const colors = useColors();
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.background }}>
-        <ActivityIndicator size="large" color={colors.primary} />
+      <View style={styles.container}>
+        <Image
+          source={require("@/assets/images/logo.png")}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+        <Text style={styles.title}>Project P.R.F</Text>
+        <ActivityIndicator size="large" color="#1565C0" style={styles.spinner} />
       </View>
     );
   }
 
-  if (!user) {
-    return <Redirect href="/login" />;
-  }
-
-  if (!user.username) {
-    return <Redirect href="/setup-username" />;
-  }
-
+  if (!user) return <Redirect href="/login" />;
+  if (!user.username) return <Redirect href="/setup-username" />;
   return <Redirect href="/(tabs)" />;
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#0D1117",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 12,
+  },
+  logo: {
+    width: 120,
+    height: 120,
+  },
+  title: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 22,
+    color: "#E6EDF3",
+    letterSpacing: -0.3,
+  },
+  spinner: {
+    marginTop: 16,
+  },
+});

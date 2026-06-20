@@ -22,6 +22,10 @@ service cloud.firestore {
       return isAdmin() || isInstrutor();
     }
 
+    function onlyInteractionFields(fields) {
+      return fields.hasOnly(['likes', 'likedBy', 'savedBy']);
+    }
+
     // ── Usuários ───────────────────────────────────────────────
     match /users/{userId} {
       allow read: if authed();
@@ -29,12 +33,10 @@ service cloud.firestore {
       allow create: if authed() && request.auth.uid == userId;
 
       allow update: if authed() && (
-        // Próprio usuário pode atualizar tudo EXCETO cargo
         (request.auth.uid == userId &&
           !request.resource.data.diff(resource.data)
             .affectedKeys().hasAny(['role', 'isSuspended', 'isBanned']))
         ||
-        // Admin pode atualizar qualquer campo de qualquer usuário
         isAdmin()
       );
 
@@ -48,7 +50,9 @@ service cloud.firestore {
       allow create: if isStaff();
 
       allow update: if authed() && (
-        resource.data.authorId == request.auth.uid || isAdmin()
+        resource.data.authorId == request.auth.uid
+        || isAdmin()
+        || onlyInteractionFields(request.resource.data.diff(resource.data).affectedKeys())
       );
 
       allow delete: if authed() && (
@@ -63,7 +67,9 @@ service cloud.firestore {
       allow create: if authed();
 
       allow update: if authed() && (
-        resource.data.authorId == request.auth.uid || isAdmin()
+        resource.data.authorId == request.auth.uid
+        || isAdmin()
+        || onlyInteractionFields(request.resource.data.diff(resource.data).affectedKeys())
       );
 
       allow delete: if authed() && (
@@ -78,7 +84,9 @@ service cloud.firestore {
       allow create: if authed();
 
       allow update: if authed() && (
-        resource.data.authorId == request.auth.uid || isAdmin()
+        resource.data.authorId == request.auth.uid
+        || isAdmin()
+        || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes', 'likedBy'])
       );
 
       allow delete: if authed() && (
