@@ -6,16 +6,24 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function isAdminEmail() {
+      return authed() && request.auth.token.email == 'leivisonbrito64@gmail.com';
+    }
+
+    function userDocExists() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
     function userDoc() {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
     }
 
     function isAdmin() {
-      return authed() && userDoc().role == 'administrador';
+      return isAdminEmail() || (authed() && userDocExists() && userDoc().role == 'administrador');
     }
 
     function isInstrutor() {
-      return authed() && userDoc().role == 'instrutor';
+      return authed() && userDocExists() && userDoc().role == 'instrutor';
     }
 
     function isStaff() {

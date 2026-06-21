@@ -1,6 +1,6 @@
 kind = "mobile"
 previewPath = "/"
-title = "Project P.R.F"
+title = "Project PRF"
 version = "1.0.0"
 id = "artifacts/prf-app"
 router = "expo-domain"

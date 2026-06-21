@@ -367,11 +367,6 @@ export function PostsProvider({ children }: { children: React.ReactNode }) {
             return next;
           });
         }
-        if (user) {
-          await updateDoc(doc(db, "users", user.id), {
-            postCount: increment(1),
-          }).catch(() => {});
-        }
         return;
       }
 
@@ -383,9 +378,9 @@ export function PostsProvider({ children }: { children: React.ReactNode }) {
       await addDoc(collection(db, colName), cleanData);
 
       if (user) {
-        await updateDoc(doc(db, "users", user.id), {
+        updateDoc(doc(db, "users", user.id), {
           postCount: increment(1),
-        });
+        }).catch(() => {});
       }
     },
     [user]
