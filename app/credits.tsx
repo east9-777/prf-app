@@ -104,10 +104,8 @@ export default function CreditsScreen() {
 
         <View style={styles.features}>
           {[
-            "Feed de novidades e atualizações da PRF",
-            "Estudos organizados por matérias",
+            "Conteúdo de estudo organizado por matérias",
             "Simulados com questões reais",
-            "Comunidade de candidatos",
             "Acompanhamento das etapas do concurso",
             "Cronograma de estudos personalizado",
           ].map((f) => (
@@ -118,29 +116,6 @@ export default function CreditsScreen() {
               </Text>
             </View>
           ))}
-        </View>
-
-        <View
-          style={[
-            styles.card,
-            { backgroundColor: colors.card, borderColor: colors.border },
-          ]}
-        >
-          <Text style={[styles.cardTitle, { color: colors.mutedForeground }]}>
-            TECNOLOGIAS
-          </Text>
-          <View style={styles.techGrid}>
-            {["React Native", "Expo", "Firebase", "AsyncStorage"].map((t) => (
-              <View
-                key={t}
-                style={[styles.techBadge, { backgroundColor: colors.muted }]}
-              >
-                <Text style={[styles.techText, { color: colors.mutedForeground }]}>
-                  {t}
-                </Text>
-              </View>
-            ))}
-          </View>
         </View>
 
         <Text style={[styles.copyright, { color: colors.mutedForeground }]}>
@@ -194,13 +169,6 @@ const styles = StyleSheet.create({
   features: { gap: 8 },
   featureItem: { flexDirection: "row", alignItems: "center", gap: 10 },
   featureText: { fontFamily: "Inter_400Regular", fontSize: 14, flex: 1 },
-  techGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  techBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-  },
-  techText: { fontFamily: "Inter_500Medium", fontSize: 12 },
   copyright: {
     fontFamily: "Inter_400Regular",
     fontSize: 12,

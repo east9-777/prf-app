@@ -28,6 +28,13 @@ export default function InicioScreen() {
       color: "#3B82F6",
     },
     {
+      icon: "layers" as const,
+      title: "Conteúdo",
+      desc: "Teoria completa das matérias do edital",
+      route: "/(tabs)/conteudo",
+      color: "#6366F1",
+    },
+    {
       icon: "clipboard" as const,
       title: "Simulados",
       desc: "Teste seus conhecimentos com simulados",

@@ -59,6 +59,10 @@ function RootLayoutNav() {
         options={{ headerShown: true }}
       />
       <Stack.Screen
+        name="conteudo/[id]"
+        options={{ headerShown: true }}
+      />
+      <Stack.Screen
         name="settings"
         options={{ headerShown: true }}
       />

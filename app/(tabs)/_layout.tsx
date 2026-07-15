@@ -136,6 +136,22 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
+          name="conteudo"
+          options={{
+            title: "Conteúdo",
+            header: () => (
+              <PRFHeader
+                onMenuPress={() => setDrawerOpen(true)}
+                onSearchPress={() => router.push("/search" as any)}
+              />
+            ),
+            headerShown: true,
+            tabBarIcon: ({ color }) => (
+              <Feather name="layers" size={22} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
           name="perfil"
           options={{
             title: "Perfil",
@@ -150,6 +166,10 @@ export default function TabLayout() {
               <Feather name="user" size={22} color={color} />
             ),
           }}
+        />
+        <Tabs.Screen
+          name="notificacoes"
+          options={{ href: null }}
         />
       </Tabs>
     </>
