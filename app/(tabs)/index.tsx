@@ -1,196 +1,162 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React from "react";
 import {
-  ActionSheetIOS,
-  Alert,
-  FlatList,
   Platform,
-  RefreshControl,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { PostCard } from "@/components/PostCard";
-import { EmptyState } from "@/components/EmptyState";
 import { useAuth } from "@/context/AuthContext";
-import { usePosts } from "@/context/PostsContext";
 import { useColors } from "@/hooks/useColors";
-import type { Post } from "@/lib/types";
 
-export default function NovidadesScreen() {
+export default function InicioScreen() {
   const colors = useColors();
-  const { canPost, isAdmin, isInstructor, user } = useAuth();
-  const { novelPosts, isLoading, toggleLike, toggleSave, togglePin, deletePost, refreshPosts } = usePosts();
+  const { user } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const [refreshing, setRefreshing] = useState(false);
 
-  const sortedPosts = useMemo(() => {
-    const pinned = novelPosts.filter((p) => p.isPinned && !p.isHidden);
-    const rest = novelPosts.filter((p) => !p.isPinned && !p.isHidden);
-    return [...pinned, ...rest];
-  }, [novelPosts]);
-
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await refreshPosts();
-    setRefreshing(false);
-  };
-
-  const handleMenu = (postId: string) => {
-    const post = novelPosts.find((p) => p.id === postId);
-    if (!post) return;
-
-    const isOwner = post.authorId === user?.id;
-    const isModeratorOrAbove = isAdmin();
-
-    const options: string[] = [];
-    if (isOwner || isModeratorOrAbove) {
-      if (isInstructor()) options.push(post.isPinned ? "Desafixar" : "Fixar publicação");
-      options.push("Excluir publicação");
-    }
-    options.push("Salvar");
-    options.push("Cancelar");
-
-    if (Platform.OS === "ios") {
-      ActionSheetIOS.showActionSheetWithOptions(
-        {
-          options,
-          cancelButtonIndex: options.length - 1,
-          destructiveButtonIndex: options.includes("Excluir publicação")
-            ? options.indexOf("Excluir publicação")
-            : undefined,
-        },
-        (idx) => {
-          const chosen = options[idx];
-          if (chosen === "Fixar publicação" || chosen === "Desafixar") togglePin(postId);
-          else if (chosen === "Excluir publicação") {
-            Alert.alert("Excluir?", "Essa ação não pode ser desfeita.", [
-              { text: "Cancelar", style: "cancel" },
-              { text: "Excluir", style: "destructive", onPress: () => deletePost(postId) },
-            ]);
-          } else if (chosen === "Salvar") toggleSave(postId);
-        }
-      );
-    } else {
-      Alert.alert("Opções", "", [
-        ...(isInstructor() ? [{ text: post.isPinned ? "Desafixar" : "Fixar publicação", onPress: () => togglePin(postId) }] : []),
-        ...(isOwner || isModeratorOrAbove
-          ? [{ text: "Excluir publicação", style: "destructive" as const, onPress: () => deletePost(postId) }]
-          : []),
-        { text: "Salvar", onPress: () => toggleSave(postId) },
-        { text: "Cancelar", style: "cancel" as const },
-      ]);
-    }
-  };
-
-  const renderPost = useCallback(
-    ({ item }: { item: Post }) => (
-      <PostCard
-        post={item}
-        onLike={toggleLike}
-        onSave={toggleSave}
-        showMenu
-        onMenu={handleMenu}
-      />
-    ),
-    [toggleLike, toggleSave, handleMenu]
-  );
-
-  const Header = useMemo(
-    () => (
-      <View style={[styles.sectionHeader, { borderBottomColor: colors.border }]}>
-        <Feather name="rss" size={15} color={colors.mutedForeground} />
-        <Text style={[styles.sectionTitle, { color: colors.mutedForeground }]}>
-          Novidades da PRF
-        </Text>
-      </View>
-    ),
-    [colors]
-  );
+  const cards = [
+    {
+      icon: "book-open" as const,
+      title: "Estudos",
+      desc: "Acesse os conteúdos e materiais de estudo",
+      route: "/(tabs)/estudos",
+      color: "#3B82F6",
+    },
+    {
+      icon: "clipboard" as const,
+      title: "Simulados",
+      desc: "Teste seus conhecimentos com simulados",
+      route: "/(tabs)/simulados",
+      color: "#10B981",
+    },
+    {
+      icon: "calendar" as const,
+      title: "Cronograma",
+      desc: "Organize sua rotina de estudos",
+      route: "/cronograma",
+      color: "#F59E0B",
+    },
+    {
+      icon: "flag" as const,
+      title: "Etapas do Concurso",
+      desc: "Conheça todas as fases do concurso",
+      route: "/etapas",
+      color: "#8B5CF6",
+    },
+  ];
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <FlatList
-        data={sortedPosts}
-        keyExtractor={(item) => item.id}
-        renderItem={renderPost}
-        ListHeaderComponent={Header}
-        ListEmptyComponent={
-          !isLoading ? (
-            <EmptyState
-              icon="rss"
-              title="Nenhuma publicação ainda"
-              subtitle="Em breve os instrutores publicarão novidades sobre o concurso da PRF"
-            />
-          ) : null
-        }
-        contentContainerStyle={[
-          styles.list,
-          { paddingBottom: insets.bottom + (Platform.OS === "web" ? 34 : 0) + 80 },
-        ]}
+      <ScrollView
         showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            tintColor={colors.primary}
-            colors={[colors.primary]}
-          />
-        }
-      />
+        contentContainerStyle={[
+          styles.scroll,
+          { paddingBottom: insets.bottom + (Platform.OS === "web" ? 34 : 0) + 24 },
+        ]}
+      >
+        <View style={[styles.welcome, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <Text style={[styles.greeting, { color: colors.mutedForeground }]}>
+            Olá, {user?.username ? `@${user.username}` : "candidato"} 👋
+          </Text>
+          <Text style={[styles.welcomeTitle, { color: colors.text }]}>
+            Bem-vindo ao{"\n"}
+            <Text style={{ color: colors.primary }}>Project P.R.F</Text>
+          </Text>
+          <Text style={[styles.welcomeDesc, { color: colors.mutedForeground }]}>
+            Seu preparatório completo para o concurso da Polícia Rodoviária Federal.
+          </Text>
+        </View>
 
-      {canPost() && (
-        <TouchableOpacity
-          style={[styles.fab, { backgroundColor: colors.primary }]}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            router.push("/create-post");
-          }}
-        >
-          <Feather name="plus" size={26} color="#FFFFFF" />
-        </TouchableOpacity>
-      )}
+        <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>
+          ACESSO RÁPIDO
+        </Text>
+
+        <View style={styles.grid}>
+          {cards.map((card) => (
+            <TouchableOpacity
+              key={card.route}
+              style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}
+              onPress={() => router.push(card.route as any)}
+              activeOpacity={0.8}
+            >
+              <View style={[styles.iconWrap, { backgroundColor: card.color + "22" }]}>
+                <Feather name={card.icon} size={22} color={card.color} />
+              </View>
+              <Text style={[styles.cardTitle, { color: colors.text }]}>{card.title}</Text>
+              <Text style={[styles.cardDesc, { color: colors.mutedForeground }]} numberOfLines={2}>
+                {card.desc}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  list: { paddingTop: 8 },
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 7,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    marginHorizontal: 12,
-    marginBottom: 8,
+  scroll: { padding: 16, gap: 16 },
+  welcome: {
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 20,
+    gap: 6,
   },
-  sectionTitle: {
+  greeting: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 14,
+  },
+  welcomeTitle: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 24,
+    lineHeight: 32,
+    letterSpacing: -0.5,
+  },
+  welcomeDesc: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 14,
+    lineHeight: 20,
+    marginTop: 4,
+  },
+  sectionLabel: {
     fontFamily: "Inter_600SemiBold",
-    fontSize: 12,
-    textTransform: "uppercase",
+    fontSize: 11,
     letterSpacing: 0.8,
+    textTransform: "uppercase",
+    marginLeft: 4,
   },
-  fab: {
-    position: "absolute",
-    right: 20,
-    bottom: 28,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+  grid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+  },
+  card: {
+    width: "47%",
+    borderRadius: 14,
+    borderWidth: 1,
+    padding: 16,
+    gap: 8,
+  },
+  iconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 8,
+  },
+  cardTitle: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 14,
+  },
+  cardDesc: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 12,
+    lineHeight: 17,
   },
 });

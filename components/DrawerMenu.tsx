@@ -13,7 +13,6 @@ import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Avatar } from "@/components/Avatar";
-import { RoleBadge } from "@/components/RoleBadge";
 import { useAuth } from "@/context/AuthContext";
 import { useColors } from "@/hooks/useColors";
 
@@ -29,7 +28,6 @@ const MENU_ITEMS = [
   { icon: "user" as const, label: "Meu Perfil", route: "/(tabs)/perfil" },
   { icon: "calendar" as const, label: "Meu Cronograma", route: "/cronograma" },
   { icon: "flag" as const, label: "Etapas do Concurso", route: "/etapas" },
-  { icon: "users" as const, label: "Comunidade", route: "/comunidade" },
   { icon: "settings" as const, label: "Configurações", route: "/settings" },
   { icon: "info" as const, label: "Créditos", route: "/credits" },
 ];
@@ -117,7 +115,6 @@ export function DrawerMenu({ visible, onClose }: DrawerMenuProps) {
           <Text style={[styles.username, { color: colors.text }]}>
             @{user?.username}
           </Text>
-          {user?.role && <RoleBadge role={user.role} size="md" />}
         </View>
 
         <View style={styles.menu}>
