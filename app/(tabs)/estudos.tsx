@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   FlatList,
   Platform,
@@ -8,11 +8,11 @@ import {
   View,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { MOCK_SUBJECTS } from "@/lib/mockData";
-import { getData, storeData, STORAGE_KEYS } from "@/lib/storage";
+import { getData, STORAGE_KEYS } from "@/lib/storage";
 import type { Subject } from "@/lib/types";
 
 type ProgressMap = Record<string, boolean>;
@@ -23,11 +23,13 @@ export default function EstudosScreen() {
   const insets = useSafeAreaInsets();
   const [progress, setProgress] = useState<ProgressMap>({});
 
-  useEffect(() => {
-    getData<ProgressMap>(STORAGE_KEYS.STUDY_PROGRESS).then((p) => {
-      if (p) setProgress(p);
-    });
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      getData<ProgressMap>(STORAGE_KEYS.STUDY_PROGRESS).then((p) => {
+        if (p) setProgress(p);
+      });
+    }, [])
+  );
 
   const getSubjectProgress = (subject: Subject) => {
     const total = subject.topics.length;

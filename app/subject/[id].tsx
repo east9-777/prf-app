@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   FlatList,
   Platform,
@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { Stack, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { MOCK_SUBJECTS } from "@/lib/mockData";
@@ -30,11 +30,13 @@ export default function SubjectScreen() {
     [id]
   );
 
-  useEffect(() => {
-    getData<ProgressMap>(STORAGE_KEYS.STUDY_PROGRESS).then((p) => {
-      if (p) setProgress(p);
-    });
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      getData<ProgressMap>(STORAGE_KEYS.STUDY_PROGRESS).then((p) => {
+        if (p) setProgress(p);
+      });
+    }, [])
+  );
 
   const toggleTopic = async (topicId: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);

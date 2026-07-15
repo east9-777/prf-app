@@ -138,7 +138,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="conteudo"
           options={{
-            title: "Conteúdo",
+            title: "Aula",
             header: () => (
               <PRFHeader
                 onMenuPress={() => setDrawerOpen(true)}

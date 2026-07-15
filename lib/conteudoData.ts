@@ -1,9 +1,36 @@
+export type HighlightBox = {
+  type: "atencao" | "pegadinha" | "muito-cobrado" | "memorize" | "dica";
+  text: string;
+};
+
+export type Example = {
+  label: "CERTO" | "ERRADO" | "Exemplo" | "Correto" | "Incorreto";
+  sentence: string;
+  explanation?: string;
+};
+
+export type TableData = {
+  title?: string;
+  headers: string[];
+  rows: string[][];
+};
+
+export type Exercise = {
+  question: string;
+  answer: "CERTO" | "ERRADO";
+  explanation: string;
+};
+
 export type TopicItem = {
   id: string;
   title: string;
   content: string;
   keyPoints: string[];
   incidencia: "alta" | "média" | "baixa";
+  highlights?: HighlightBox[];
+  examples?: Example[];
+  tables?: TableData[];
+  exercises?: Exercise[];
 };
 
 export type ConteudoSubject = {
@@ -16,6 +43,7 @@ export type ConteudoSubject = {
 };
 
 export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
+  // ─── LÍNGUA PORTUGUESA ───────────────────────────────────────────────────────
   {
     id: "portugues",
     name: "Língua Portuguesa",
@@ -37,6 +65,23 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Distingua fatos de opiniões do autor",
           "Denotação vs. conotação de palavras no contexto",
         ],
+        highlights: [
+          { type: "muito-cobrado", text: "Interpretação representa cerca de 30–40% das questões de Português na PRF. Domine este tópico antes de qualquer outro." },
+          { type: "pegadinha", text: "A banca tenta 'completar' o texto afirmando algo que não está escrito. Se a informação não consta no texto, a afirmativa é ERRADA." },
+          { type: "dica", text: "Ao responder CERTO/ERRADO, volte sempre ao trecho exato do texto que sustenta (ou contradiz) a afirmativa." },
+        ],
+        examples: [
+          { label: "ERRADO", sentence: "O texto afirma que todo policial rodoviário federal é corajoso.", explanation: "Palavra absoluta 'todo' não sustentada pelo texto — quase sempre incorreta." },
+          { label: "CERTO", sentence: "Depreende-se do texto que a atividade de fiscalização é essencial para a segurança viária.", explanation: "Inferência válida a partir das informações contidas no texto." },
+          { label: "ERRADO", sentence: "O autor defende a extinção do sistema de multas de trânsito.", explanation: "Extrapolação: o texto não permite essa conclusão." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE – PRF) Considere o trecho: 'A fiscalização eficiente reduz acidentes, mas não elimina completamente o risco nas rodovias.' Com base nisso, é correto afirmar que o texto garante a eliminação total dos acidentes com uma boa fiscalização.",
+            answer: "ERRADO",
+            explanation: "O texto é explícito ao usar 'mas não elimina completamente o risco', o que contradiz diretamente a afirmativa. Atenção ao 'mas' adversativo e ao advérbio 'completamente'.",
+          },
+        ],
       },
       {
         id: "port-coesao",
@@ -52,6 +97,38 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Condicionais: se, caso, desde que, contanto que",
           "Pronomes e elipses garantem a coesão referencial",
         ],
+        highlights: [
+          { type: "muito-cobrado", text: "A substituição de conectivos é cobrada toda prova. Confundir um adversativo (mas) com um conclusivo (portanto) altera radicalmente o sentido." },
+          { type: "pegadinha", text: "'Pois' pode ser causal (antes do verbo: 'Estudei, pois queria passar') ou explicativo (depois: 'Estude, pois a prova é difícil'). O CEBRASPE cobra essa distinção." },
+          { type: "memorize", text: "CONCLUSIVOS: logo, portanto, assim, por isso, então, por conseguinte, em suma. ADVERSATIVOS: mas, porém, contudo, todavia, entretanto, no entanto." },
+        ],
+        tables: [
+          {
+            title: "Principais conectivos e suas relações",
+            headers: ["Relação", "Conectivos"],
+            rows: [
+              ["Adversidade", "mas, porém, contudo, todavia, entretanto, no entanto"],
+              ["Causa",       "porque, pois, já que, visto que, uma vez que"],
+              ["Concessão",   "embora, apesar de, conquanto, ainda que, mesmo que"],
+              ["Conclusão",   "logo, portanto, assim, por isso, por conseguinte"],
+              ["Condição",    "se, caso, desde que, contanto que, a menos que"],
+              ["Tempo",       "quando, enquanto, depois que, antes que, assim que"],
+              ["Adição",      "e, nem, não só…mas também, além disso"],
+              ["Finalidade",  "para que, a fim de que, com o intuito de"],
+            ],
+          },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "O trecho 'Embora chova muito, as rodovias permanecem operacionais' apresenta relação de concessão entre as orações.", explanation: "'Embora' é conjunção concessiva." },
+          { label: "ERRADO", sentence: "O conectivo 'portanto' no trecho estabelece relação de causa entre as orações.", explanation: "'Portanto' é conclusivo, não causal." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) O conectivo 'contudo' em 'O candidato estudou muito; contudo, não foi aprovado' pode ser substituído, sem alteração de sentido, por 'porque'.",
+            answer: "ERRADO",
+            explanation: "'Contudo' é adversativo (ideia de oposição/restrição). 'Porque' é causal. A substituição altera completamente o sentido da frase.",
+          },
+        ],
       },
       {
         id: "port-morfologia",
@@ -66,6 +143,35 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Advérbios de modo: terminados em -mente",
           "Preposições essenciais: a, ante, até, com, contra, de, desde, em, entre, para, por, sem, sob, sobre, trás",
           "Cuidado com a transitividade verbal para regência",
+        ],
+        highlights: [
+          { type: "pegadinha", text: "'Onde' refere-se a lugar físico: 'A cidade onde moro'. Para situações abstratas, use 'em que': 'A situação em que me encontro' (ERRADO usar 'onde' aqui)." },
+          { type: "atencao", text: "'Cujo' é pronome relativo de posse e concorda com o possuído (o que está depois): 'O agente cujas funções são relevantes' — funções = feminino plural." },
+        ],
+        tables: [
+          {
+            title: "Pronomes pessoais do caso reto e oblíquo",
+            headers: ["Pessoa", "Caso reto (sujeito)", "Oblíquo átono", "Oblíquo tônico"],
+            rows: [
+              ["1ª singular", "eu",   "me",       "mim, comigo"],
+              ["2ª singular", "tu",   "te",       "ti, contigo"],
+              ["3ª singular", "ele/ela", "o/a/lhe", "ele/ela, consigo"],
+              ["1ª plural",  "nós",  "nos",      "nós, conosco"],
+              ["2ª plural",  "vós",  "vos",      "vós, convosco"],
+              ["3ª plural",  "eles/elas", "os/as/lhes", "eles/elas"],
+            ],
+          },
+        ],
+        examples: [
+          { label: "ERRADO", sentence: "Esta é a empresa onde trabalho há dez anos.", explanation: "Empresa não é lugar físico no sentido estrito. O correto seria 'em que trabalho'." },
+          { label: "CERTO", sentence: "O policial cujo veículo foi danificado registrou o boletim de ocorrência.", explanation: "'Cujo' concorda com 'veículo' (masculino singular) — correto." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) Em 'O local onde ocorreu o acidente foi sinalizado', o pronome relativo 'onde' está empregado adequadamente.",
+            answer: "CERTO",
+            explanation: "'Onde' refere-se a 'local', que é um lugar físico. O emprego está correto.",
+          },
         ],
       },
       {
@@ -83,6 +189,38 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Visar (almejar): exige 'a' — visa ao cargo; Visar (cheque): sem preposição",
           "Obedecer: exige 'a' — obedece às leis",
         ],
+        highlights: [
+          { type: "muito-cobrado", text: "HAVER e FAZER impessoais NÃO variam: 'Havia muitos candidatos' (não 'haviam'). 'Faz dois dias' (não 'fazem'). A banca cobra isso toda prova." },
+          { type: "pegadinha", text: "'Assistir' tem dois sentidos: (1) ver/presenciar → rege 'a' ('assisti ao filme'); (2) caber/beneficiar → rege 'a' ('assiste-lhe o direito'). Nunca use 'assistir' sem preposição no sentido de 'ver'." },
+          { type: "memorize", text: "Verbos que exigem 'a': assistir (ver), aspirar (desejar), obedecer, desobedecer, responder, visar (almejar), aludir, referir-se." },
+        ],
+        tables: [
+          {
+            title: "Regência dos verbos mais cobrados",
+            headers: ["Verbo", "Regência", "Exemplo correto"],
+            rows: [
+              ["Assistir (ver)",    "VTI — rege 'a'",    "Assisti ao julgamento"],
+              ["Visar (almejar)",   "VTI — rege 'a'",    "Visa ao cargo de PRF"],
+              ["Visar (cheque)",    "VTD — sem prep.",   "Visou o cheque"],
+              ["Obedecer",          "VTI — rege 'a'",    "Obedece às leis"],
+              ["Preferir",          "VTD+VTI — rege 'a'","Prefiro café a chá"],
+              ["Implicar (acarretar)", "VTD — sem prep.", "Implica consequências"],
+              ["Chegar / Ir",       "rege 'a'",           "Chegou a Brasília"],
+            ],
+          },
+        ],
+        examples: [
+          { label: "ERRADO", sentence: "Haviam muitos candidatos inscritos no concurso da PRF.", explanation: "'Haver' no sentido de 'existir' é impessoal e não varia: 'Havia muitos candidatos'." },
+          { label: "CERTO", sentence: "O policial obedeceu às ordens superiores sem questionar.", explanation: "'Obedecer' exige a preposição 'a' — correto." },
+          { label: "ERRADO", sentence: "O candidato aspira o cargo de PRF há anos.", explanation: "'Aspirar' no sentido de desejar exige 'a': 'aspira ao cargo'." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE – PRF 2021) 'Fazem dois anos que não ocorrem acidentes neste trecho da rodovia.' A concordância do verbo 'fazer' está correta nessa frase.",
+            answer: "ERRADO",
+            explanation: "'Fazer' indicando tempo decorrido é impessoal e não varia: o correto é 'Faz dois anos'. Da mesma forma, 'ocorrer' deve concordar com 'acidentes' (plural) — 'não ocorrem' está correto nessa parte.",
+          },
+        ],
       },
       {
         id: "port-crase",
@@ -98,6 +236,23 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "PROIBIDA antes de pronomes: 'a ela', 'a você', 'a nós'",
           "Cidades sem artigo: 'Fui a Brasília' (sem crase)",
           "Teste: substitua por palavra masculina — se aparecer 'ao', há crase",
+        ],
+        highlights: [
+          { type: "dica", text: "Teste da substituição: troque a palavra feminina por uma masculina. Se usar 'ao', há crase ('ao diretor' → 'à diretora'). Se usar 'a', não há crase ('a ele' → 'a ela')." },
+          { type: "pegadinha", text: "'A partir de' sempre sem crase, pois 'partir' é verbo. 'À parte' (separadamente) tem crase; 'a parte' (uma parte) não tem. O CEBRASPE adora essa dupla." },
+          { type: "atencao", text: "Nomes de cidades: há crase apenas quando a cidade aceita artigo ('à São Paulo' — pois dizemos 'a São Paulo'); não há crase em 'Fui a Brasília' (sem artigo antes de Brasília)." },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "O policial chegou à delegacia às 8 horas da manhã.", explanation: "'à delegacia' = prep. a + artigo a; 'às 8 horas' = horas determinadas." },
+          { label: "ERRADO", sentence: "Ele foi à pé até o local do acidente.", explanation: "'a pé' não tem crase pois 'pé' é masculino. Correto: 'a pé'." },
+          { label: "ERRADO", sentence: "O relatório foi encaminhado à ela.", explanation: "Não há crase antes de pronomes pessoais. Correto: 'a ela'." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) O uso do acento grave em 'O agente referiu-se à ocorrência registrada ontem' está correto.",
+            answer: "CERTO",
+            explanation: "'Referir-se' exige a preposição 'a' + artigo 'a' antes de palavra feminina ('ocorrência') → crase obrigatória.",
+          },
         ],
       },
       {
@@ -115,9 +270,27 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Oração adverbial anteposta à principal: seguida de vírgula",
           "Ponto e vírgula: separa itens de enumeração ou orações com vírgulas internas",
         ],
+        highlights: [
+          { type: "pegadinha", text: "Não se usa vírgula antes de 'que' quando ele é objeto direto: 'O policial confirmou que o suspeito fugiu' — ERRADO colocar vírgula antes de 'que'." },
+          { type: "muito-cobrado", text: "Separar sujeito de predicado com vírgula é o ERRO mais cobrado. Ex: 'O policial rodoviário federal, fiscalizou a rodovia.' — vírgula errada." },
+        ],
+        examples: [
+          { label: "ERRADO", sentence: "O candidato aprovado, comemorou a vitória com a família.", explanation: "Vírgula entre sujeito ('O candidato aprovado') e verbo ('comemorou') — proibida." },
+          { label: "CERTO", sentence: "Ao chegar ao local, o agente registrou a ocorrência.", explanation: "Oração adverbial temporal ('Ao chegar ao local') anteposta → vírgula obrigatória." },
+          { label: "CERTO", sentence: "Pedro, o melhor candidato da turma, foi aprovado na PRF.", explanation: "Aposto explicativo ('o melhor candidato da turma') entre vírgulas — correto." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) A vírgula empregada em 'Os candidatos, aprovados na prova objetiva, serão convocados para a próxima fase' está correta.",
+            answer: "CERTO",
+            explanation: "'aprovados na prova objetiva' é aposto ou oração reduzida de particípio com valor adjetivo. A intercalação entre vírgulas é gramaticalmente correta.",
+          },
+        ],
       },
     ],
   },
+
+  // ─── RACIOCÍNIO LÓGICO ───────────────────────────────────────────────────────
   {
     id: "raciocinio-logico",
     name: "Raciocínio Lógico",
@@ -139,6 +312,33 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Negação inverte o valor lógico da proposição",
           "Sentença interrogativa NÃO é proposição",
         ],
+        highlights: [
+          { type: "muito-cobrado", text: "A condicional (→) é o conectivo mais cobrado. Memorize: p→q é FALSA somente quando p é V e q é F. Em todos os outros casos, é VERDADEIRA." },
+          { type: "pegadinha", text: "'Todo policial é corajoso' é uma proposição categórica universal, não uma condicional, mas pode ser reescrita como: 'Se é policial, então é corajoso'. O CEBRASPE usa ambas as formas." },
+        ],
+        tables: [
+          {
+            title: "Tabela-verdade dos conectivos principais",
+            headers: ["p", "q", "p ∧ q (E)", "p ∨ q (OU)", "p → q (SE…ENTÃO)", "p ↔ q (SSE)"],
+            rows: [
+              ["V", "V", "V", "V", "V", "V"],
+              ["V", "F", "F", "V", "F", "F"],
+              ["F", "V", "F", "V", "V", "F"],
+              ["F", "F", "F", "F", "V", "V"],
+            ],
+          },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "'2 + 2 = 4' é uma proposição verdadeira.", explanation: "Sentença declarativa com valor lógico definido." },
+          { label: "ERRADO", sentence: "'Que horas são?' é uma proposição falsa.", explanation: "Frases interrogativas não são proposições — não têm valor lógico." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) Dadas as proposições p (verdadeira) e q (falsa), a proposição composta p → q é verdadeira.",
+            answer: "ERRADO",
+            explanation: "p → q é FALSA somente quando p = V e q = F. Como p é V e q é F, a condicional é FALSA.",
+          },
+        ],
       },
       {
         id: "rl-negacao",
@@ -153,6 +353,21 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Contrapositiva de p→q é ¬q→¬p (equivalente)",
           "Negação de 'Todo A é B': 'Algum A não é B'",
           "Negação de 'Nenhum A é B': 'Algum A é B'",
+        ],
+        highlights: [
+          { type: "memorize", text: "Negação das categorias: NEG('Todo A é B') = 'Existe A que não é B'. NEG('Nenhum A é B') = 'Existe A que é B'. NEG('Algum A é B') = 'Nenhum A é B'." },
+          { type: "dica", text: "Contrapositiva é a equivalente mais útil: 'Se chove, então o chão molha' ↔ 'Se o chão não molhou, então não choveu'. Use-a para resolver silogismos." },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "A negação de 'Todos os candidatos estudaram' é 'Algum candidato não estudou'.", explanation: "NEG(∀x P(x)) = ∃x ¬P(x)." },
+          { label: "ERRADO", sentence: "A negação de 'p → q' é '¬p → ¬q'.", explanation: "A negação correta é 'p ∧ ¬q'. '¬p → ¬q' é a inversa, não a negação." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) A negação de 'Se o policial está em serviço, então ele está fardado' é 'Se o policial não está em serviço, então ele não está fardado'.",
+            answer: "ERRADO",
+            explanation: "A negação de p → q é p ∧ ¬q: 'O policial está em serviço E não está fardado'. A afirmativa da questão é a 'inversa' da condicional, que não equivale à negação.",
+          },
         ],
       },
       {
@@ -169,6 +384,21 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Eventos independentes: P(A∩B) = P(A) × P(B)",
           "O CEBRASPE costuma contextualizar com situações policiais",
         ],
+        highlights: [
+          { type: "dica", text: "Quando o problema diz 'pelo menos um', use o complementar: P(pelo menos 1) = 1 - P(nenhum). É muito mais rápido." },
+          { type: "muito-cobrado", text: "Probabilidade em urnas e baralhos é clássica. Sempre identifique: espaço amostral total, evento favorável, e se os eventos são com ou sem reposição." },
+        ],
+        examples: [
+          { label: "Exemplo", sentence: "Uma urna tem 4 bolas vermelhas e 6 azuis. P(tirar vermelha) = 4/10 = 2/5 = 0,4 = 40%.", explanation: "Casos favoráveis = 4; total = 10." },
+          { label: "Exemplo", sentence: "P(cara em moeda honesta) = 1/2. Dois lances independentes: P(2 caras) = 1/2 × 1/2 = 1/4.", explanation: "Eventos independentes: multiplica as probabilidades." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) Em um grupo de 10 agentes, 6 são do sexo masculino e 4 do feminino. Ao sortear 1 agente, a probabilidade de ser do sexo feminino é de 40%.",
+            answer: "CERTO",
+            explanation: "P(feminino) = 4/10 = 0,4 = 40%. Correto.",
+          },
+        ],
       },
       {
         id: "rl-combinatoria",
@@ -184,13 +414,39 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Anagramas com letras repetidas: n! dividido pelo fatorial de cada repetição",
           "Princípio aditivo: para eventos mutuamente exclusivos, some as quantidades",
         ],
+        highlights: [
+          { type: "dica", text: "Para escolher r entre n quando a ORDEM NÃO importa (comissão, grupo, comitê) → Combinação. Quando a ordem importa (senha, fila, pódio) → Arranjo." },
+          { type: "pegadinha", text: "C(5,2) = C(5,3) = 10. A banca pode apresentar valores equivalentes para confundir." },
+        ],
+        tables: [
+          {
+            title: "Quando usar cada fórmula",
+            headers: ["Situação", "Fórmula", "Exemplo"],
+            rows: [
+              ["Todos os elementos, ordem importa", "P(n) = n!", "Anagramas da palavra PRF: 3! = 6"],
+              ["Parte dos elementos, ordem importa", "A(n,r) = n!/(n-r)!", "Pódio de 3 em 5 atletas: A(5,3) = 60"],
+              ["Parte dos elementos, ordem NÃO importa", "C(n,r) = n!/[r!(n-r)!]", "Comissão de 2 em 5: C(5,2) = 10"],
+            ],
+          },
+        ],
+        examples: [
+          { label: "Exemplo", sentence: "Anagramas de 'PRF' (3 letras, sem repetição): P(3) = 3! = 6 arranjos.", explanation: "PRF, PFR, RPF, RFP, FPR, FRP." },
+          { label: "Exemplo", sentence: "Escolher 2 delegados entre 5 candidatos (ordem não importa): C(5,2) = 5!/(2!×3!) = 10.", explanation: "Combinação pois o grupo é não ordenado." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) De um grupo de 6 policiais, deseja-se formar uma comissão de 3. O número de comissões possíveis é 20.",
+            answer: "CERTO",
+            explanation: "C(6,3) = 6! / (3! × 3!) = 720 / (6×6) = 720/36 = 20. Correto.",
+          },
+        ],
       },
       {
         id: "rl-raciocinio-sequencias",
         title: "Sequências e Progressões",
         incidencia: "média",
         content:
-          "PA (Progressão Aritmética): diferença constante entre termos consecutivos.\nTermo geral: an = a1 + (n-1)d\nSoma dos termos: Sn = n(a1+an)/2\n\nPG (Progressão Geométrica): razão constante entre termos consecutivos.\nTermo geral: an = a1 × q^(n-1)\nSoma de PA finita: Sn = a1(q^n - 1)/(q-1)",
+          "PA (Progressão Aritmética): diferença constante entre termos consecutivos.\nTermo geral: an = a1 + (n-1)d\nSoma dos termos: Sn = n(a1+an)/2\n\nPG (Progressão Geométrica): razão constante entre termos consecutivos.\nTermo geral: an = a1 × q^(n-1)\nSoma de PG finita: Sn = a1(q^n - 1)/(q-1)",
         keyPoints: [
           "PA: diferença entre termos consecutivos é constante (razão r)",
           "Termo geral PA: an = a1 + (n-1)d",
@@ -199,9 +455,26 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Termo geral PG: an = a1 × q^(n-1)",
           "Em sequências figurais, identifique o padrão visual ou numérico",
         ],
+        highlights: [
+          { type: "dica", text: "Para identificar PA: as diferenças entre termos consecutivos são iguais. Para PG: os quocientes são iguais. Calcule sempre 2-3 diferenças/quocientes para confirmar." },
+          { type: "atencao", text: "O CEBRASPE costuma apresentar sequências mistas ou com padrão não óbvio (diferença das diferenças, alternância). Vá além de simplesmente calcular a1+d." },
+        ],
+        examples: [
+          { label: "Exemplo", sentence: "Sequência 2, 5, 8, 11, 14... → PA com a1=2 e d=3. Próximo termo: 14+3 = 17.", explanation: "Diferença constante = 3." },
+          { label: "Exemplo", sentence: "Sequência 3, 6, 12, 24... → PG com a1=3 e q=2. Próximo: 24×2 = 48.", explanation: "Razão constante = 2." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) Na progressão aritmética (2, 5, 8, 11, ...), o décimo termo é 29.",
+            answer: "CERTO",
+            explanation: "a10 = a1 + (10-1) × d = 2 + 9 × 3 = 2 + 27 = 29. Correto.",
+          },
+        ],
       },
     ],
   },
+
+  // ─── LEGISLAÇÃO DE TRÂNSITO ──────────────────────────────────────────────────
   {
     id: "legislacao-transito",
     name: "Legislação de Trânsito",
@@ -223,6 +496,35 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "PM: fiscalização em vias estaduais e municipais (quando delegada)",
           "Municípios: trânsito urbano (quando constituído órgão próprio)",
         ],
+        highlights: [
+          { type: "muito-cobrado", text: "CONTRAN é o órgão máximo normativo do SNT — não é a PRF, não é o DETRAN. O CEBRASPE costuma inverter as atribuições dos órgãos." },
+          { type: "pegadinha", text: "A PRF fiscaliza RODOVIAS FEDERAIS — não vias estaduais, municipais ou urbanas. A banca frequentemente afirma que a PRF atua em 'todas as vias públicas'." },
+        ],
+        tables: [
+          {
+            title: "Órgãos do SNT e suas atribuições",
+            headers: ["Órgão", "Nível", "Atribuição principal"],
+            rows: [
+              ["CONTRAN",   "Federal (máximo)", "Normatiza, coordena e fiscaliza o SNT"],
+              ["SENATRAN",  "Federal (executivo)", "Executa a política nacional de trânsito"],
+              ["PRF",       "Federal (rodoviário)", "Patrulha e fiscaliza rodovias federais"],
+              ["DETRAN",    "Estadual",        "Registro, habilitação e fiscalização estadual"],
+              ["PM",        "Estadual",        "Polícia ostensiva de trânsito em vias estaduais"],
+              ["CTM/SMTT",  "Municipal",       "Trânsito urbano (quando constituído órgão)"],
+            ],
+          },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "O CONTRAN é o órgão máximo normativo e consultivo do Sistema Nacional de Trânsito.", explanation: "Correto conforme art. 7° do CTB." },
+          { label: "ERRADO", sentence: "A PRF tem competência para fiscalizar vias estaduais quando solicitada.", explanation: "A atribuição da PRF é exclusivamente nas rodovias federais, conforme art. 20 do CTB." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE – PRF) A PRF é subordinada hierarquicamente ao CONTRAN no exercício de suas funções de fiscalização de trânsito nas rodovias federais.",
+            answer: "ERRADO",
+            explanation: "A PRF é subordinada ao Ministério da Justiça e Segurança Pública. O CONTRAN é o órgão normativo máximo do SNT, mas não há subordinação hierárquica da PRF ao CONTRAN.",
+          },
+        ],
       },
       {
         id: "ctb-circulacao",
@@ -237,6 +539,21 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Via preferencial: indicada por sinalização especifica",
           "Velocidade máxima em rodovias federais: 110 km/h (automóveis)",
           "Velocidade mínima: metade da velocidade máxima permitida",
+        ],
+        highlights: [
+          { type: "memorize", text: "Hierarquia da sinalização (do mais importante para o menos): 1° Agente de trânsito; 2° Semáforo; 3° Sinalização vertical; 4° Sinalização horizontal." },
+          { type: "pegadinha", text: "'Rodovia' ≠ 'Estrada'. A rodovia tem pista, acostamento e faixa de domínio; a estrada é via rural sem essas características. O CEBRASPE troca os conceitos." },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "A sinalização do agente de trânsito prevalece sobre a sinalização semafórica.", explanation: "Art. 88, parágrafo único do CTB: o agente de trânsito tem prevalência sobre todos os sinais." },
+          { label: "ERRADO", sentence: "Rodovia e estrada são termos sinônimos no CTB.", explanation: "São conceitos distintos: rodovia tem pista, acostamento e faixa de domínio; estrada não." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE – PRF) Conforme o CTB, em caso de sinal verde no semáforo, o condutor pode avançar mesmo que um agente de trânsito esteja determinando a parada.",
+            answer: "ERRADO",
+            explanation: "O agente de trânsito prevalece sobre todos os sinais, inclusive semafóricos. O condutor deve obedecer ao agente.",
+          },
         ],
       },
       {
@@ -254,6 +571,33 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Celular ao volante: gravíssima, multa x3",
           "Não usar cinto: gravíssima (motorista e passageiros)",
         ],
+        highlights: [
+          { type: "muito-cobrado", text: "Dirigir sob efeito de álcool (art. 165 CTB): infração gravíssima, multa x10 (maior multiplicador), suspensão de 12 meses. Além da infração administrativa, pode configurar o crime do art. 306." },
+          { type: "atencao", text: "Atenção ao art. 165-A: recusar o teste do bafômetro é infração gravíssima com multa x3 e suspensão de 12 meses — mesma penalidade de quem é flagrado embriagado." },
+        ],
+        tables: [
+          {
+            title: "Graduação das infrações de trânsito",
+            headers: ["Gravidade", "Pontos na CNH", "Exemplos principais"],
+            rows: [
+              ["Gravíssima", "7 pontos", "Álcool, racha, cinto, celular, sinal vermelho"],
+              ["Grave",      "5 pontos", "Ultrapassagem proibida, excesso de velocidade 20-50%"],
+              ["Média",      "4 pontos", "Avançar preferencial, usar faixa errada"],
+              ["Leve",       "3 pontos", "Documentação incompleta, outros"],
+            ],
+          },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "Dirigir utilizando telefone celular enquanto o veículo está em movimento é infração gravíssima com multa multiplicada por três.", explanation: "Art. 252, V do CTB — correto." },
+          { label: "ERRADO", sentence: "O condutor que acumular 15 pontos em 12 meses terá a CNH suspensa.", explanation: "A suspensão ocorre com 20 ou mais pontos (art. 261 CTB), não 15." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE – PRF) Recusar-se a submeter ao teste de alcoolemia (bafômetro), quando solicitado pelo agente de autoridade de trânsito, configura infração de natureza leve.",
+            answer: "ERRADO",
+            explanation: "Art. 165-A do CTB: recusar o teste de alcoolemia é infração gravíssima (não leve), com multa multiplicada por 3 e suspensão do direito de dirigir por 12 meses.",
+          },
+        ],
       },
       {
         id: "ctb-crimes",
@@ -268,6 +612,37 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Art. 308: racha sem resultado — 1 a 3 anos; com lesão grave — 3 a 6 anos; com morte — 5 a 10 anos",
           "Art. 305: fuga do local — 6 meses a 1 ano + suspensão",
           "Ação penal pública incondicionada para todos os crimes de trânsito",
+        ],
+        highlights: [
+          { type: "memorize", text: "Art. 306 (embriaguez): concentração ≥ 0,3 mg/L ar alveolar OU ≥ 0,6 g/dL sangue → CRIME (detenção 6 meses a 3 anos + multa + suspensão)." },
+          { type: "pegadinha", text: "Fuga do local do acidente (art. 305) é crime autônomo — mesmo que não haja lesão ou morte. Muitos candidatos acham que só há crime se houver vítima." },
+        ],
+        tables: [
+          {
+            title: "Crimes de trânsito — penas",
+            headers: ["Art.", "Crime", "Pena"],
+            rows: [
+              ["302", "Homicídio culposo",       "2 a 4 anos de detenção"],
+              ["303", "Lesão corporal culposa",   "6 meses a 2 anos"],
+              ["304", "Omissão de socorro",       "6 meses a 1 ano + multa"],
+              ["305", "Fuga do local",            "6 meses a 1 ano + suspensão"],
+              ["306", "Embriaguez ao volante",    "6 meses a 3 anos + multa + suspensão"],
+              ["307", "Violar suspensão da CNH",  "6 meses a 1 ano + multa"],
+              ["308", "Racha (sem resultado)",    "1 a 3 anos + suspensão + multa"],
+              ["308§2", "Racha com morte",        "5 a 10 anos + suspensão"],
+            ],
+          },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "O crime de racha com resultado morte (art. 308, §2°) prevê pena de reclusão de 5 a 10 anos.", explanation: "Após a Lei 13.546/2017 — correto." },
+          { label: "ERRADO", sentence: "O crime de embriaguez ao volante exige que o condutor cause um acidente para sua configuração.", explanation: "O art. 306 é crime de perigo abstrato — configura-se pela condução com concentração ilícita de álcool, independentemente de acidente." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) O crime de omissão de socorro (art. 304 CTB) só se configura quando a vítima vier a falecer em consequência da omissão.",
+            answer: "ERRADO",
+            explanation: "A omissão de socorro é crime formal — configura-se pelo simples ato de não prestar socorro quando possível, independentemente do resultado da vítima.",
+          },
         ],
       },
       {
@@ -285,6 +660,35 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "PPD: 1 ano; sem infração grave → converte em CNH",
           "Validade da CNH: 10 anos (até 50 anos), 5 anos (50-70), 3 anos (acima de 70)",
         ],
+        highlights: [
+          { type: "pegadinha", text: "Para categoria D (transportar passageiros), a idade mínima é 21 anos — não 18. O CEBRASPE afirma '18 anos' para confundir." },
+          { type: "memorize", text: "Validade da CNH: até 50 anos → 10 anos; 50 a 70 → 5 anos; acima de 70 → 3 anos." },
+        ],
+        tables: [
+          {
+            title: "Categorias da CNH — requisitos",
+            headers: ["Categoria", "Veículo", "Idade mínima", "Pré-requisito"],
+            rows: [
+              ["A", "Motocicletas",              "18 anos", "—"],
+              ["B", "Automóveis (≤3.500 kg)",    "18 anos", "—"],
+              ["AB", "Moto + Automóvel",         "18 anos", "—"],
+              ["C", "Carga (>3.500 kg)",          "21 anos", "B há 1 ano"],
+              ["D", "Passageiros (>8 lugares)",   "21 anos", "B ou C há 1 ano"],
+              ["E", "Combinações de veículos",    "21 anos", "C ou D há 1 ano"],
+            ],
+          },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "Um condutor com 22 anos, titular da categoria B há 2 anos, pode requerer a categoria C.", explanation: "21 anos e B há pelo menos 1 ano — requisitos atendidos." },
+          { label: "ERRADO", sentence: "A PPD tem validade de 2 anos a partir da data de expedição.", explanation: "A PPD tem validade de 1 ano (art. 148 CTB)." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) Para obter a habilitação na categoria D, o condutor deve ter, no mínimo, 18 anos e possuir a categoria B há pelo menos 1 ano.",
+            answer: "ERRADO",
+            explanation: "Para a categoria D, a idade mínima é 21 anos (não 18). O requisito de ter a categoria B há pelo menos 1 ano está correto.",
+          },
+        ],
       },
       {
         id: "ctb-alcool",
@@ -297,12 +701,30 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Infração administrativa: 0,05 mg/L ar alveolar (ou sinais de alteração)",
           "CRIME (art. 306): ≥ 0,3 mg/L ar alveolar ou ≥ 0,6 g/dL sangue",
           "Recusar bafômetro: infração gravíssima + suspensão CNH",
-          "MP 1.327/2025: atualiza penalidades — suspenção de 12 meses e 10 multas",
+          "MP 1.327/2025: atualiza penalidades — suspensão de 12 meses e 10 multas",
           "Motorista profissional: mesmos limites, mas perda da CNH por 12 meses",
+        ],
+        highlights: [
+          { type: "memorize", text: "Limites: Infração: 0,05 mg/L ar (ou 0,1 g/L sangue). Crime: 0,3 mg/L ar (ou 0,6 g/L sangue). A diferença entre os dois limites é 6x no bafômetro." },
+          { type: "atencao", text: "A recusa ao teste de alcoolemia (bafômetro) gera infração gravíssima INDEPENDENTEMENTE do nível de álcool. A banca afirma que 'a recusa não gera penalidade' — ERRADO." },
+          { type: "muito-cobrado", text: "O crime do art. 306 CTB é de perigo abstrato: basta a concentração ilícita para configurar o crime, mesmo sem causar acidente." },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "Conduzir veículo com concentração de 0,4 mg/L de álcool no ar alveolar configura crime, e não apenas infração administrativa.", explanation: "0,4 ≥ 0,3 mg/L → crime do art. 306 CTB." },
+          { label: "ERRADO", sentence: "O condutor que recusar o bafômetro não poderá sofrer nenhuma penalidade administrativa.", explanation: "A recusa é infração gravíssima com multa x3 e suspensão de 12 meses." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE – PRF) Somente é possível caracterizar o crime de embriaguez ao volante (art. 306 CTB) se o condutor causar acidente de trânsito com vítimas.",
+            answer: "ERRADO",
+            explanation: "O crime do art. 306 é de perigo abstrato. Configura-se pela simples condução com concentração ≥ 0,3 mg/L de álcool no ar alveolar, independentemente de acidente ou vítimas.",
+          },
         ],
       },
     ],
   },
+
+  // ─── FÍSICA APLICADA AO TRÂNSITO ─────────────────────────────────────────────
   {
     id: "fisica",
     name: "Física Aplicada ao Trânsito",
@@ -324,6 +746,21 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Espaço percorrido em MRU = área sob o gráfico v × t",
           "Gráfico x × t do MRU: reta com inclinação = velocidade",
         ],
+        highlights: [
+          { type: "dica", text: "Conversão rápida: para converter km/h em m/s, divida por 3,6. Para m/s em km/h, multiplique por 3,6. Memorize: 36 km/h = 10 m/s; 72 km/h = 20 m/s; 108 km/h = 30 m/s." },
+          { type: "muito-cobrado", text: "Velocidade média ≠ média das velocidades. vm = distância total / tempo total. Se percorreu 60 km em 40 min: vm = 60/(40/60) = 90 km/h." },
+        ],
+        examples: [
+          { label: "Exemplo", sentence: "Um carro percorre 120 km em 1,5 h em MRU. Velocidade = 120/1,5 = 80 km/h.", explanation: "vm = Δx/Δt." },
+          { label: "Exemplo", sentence: "Converter 90 km/h para m/s: 90 ÷ 3,6 = 25 m/s.", explanation: "Conversão padrão." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) Um veículo trafega a 72 km/h em MRU. Em 5 segundos, percorre 100 metros.",
+            answer: "CERTO",
+            explanation: "72 km/h = 20 m/s. Espaço em MRU: x = v × t = 20 × 5 = 100 m. Correto.",
+          },
+        ],
       },
       {
         id: "fis-mruv",
@@ -338,6 +775,21 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Distância de frenagem ∝ v² (quadruplica ao dobrar velocidade)",
           "Distância total = distância de reação + distância de frenagem",
           "Tempo de reação médio humano: 0,7s a 1,5s",
+        ],
+        highlights: [
+          { type: "muito-cobrado", text: "Torricelli (v² = v₀² + 2aΔx) é a equação mais cobrada quando o enunciado NÃO fornece o tempo. Use-a para calcular distância de frenagem." },
+          { type: "atencao", text: "Dobrar a velocidade QUADRUPLICA a distância de frenagem (relação com v²). Triplicar a velocidade aumenta 9 vezes. Isso é fundamental para entender a física dos acidentes." },
+        ],
+        examples: [
+          { label: "Exemplo", sentence: "Frenagem de 60 km/h (16,7 m/s) com desaceleração de 5 m/s²: df = v²/(2a) = (16,7)²/10 ≈ 27,9 m.", explanation: "Torricelli: 0 = v₀² + 2(-5)Δx → Δx = v₀²/10." },
+          { label: "Exemplo", sentence: "Se a velocidade dobra de 30 para 60 km/h, a distância de frenagem quadruplica.", explanation: "Δx ∝ v²: (60/30)² = 4." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) Um veículo trafegando a 60 km/h tem distância de frenagem 4 vezes maior que o mesmo veículo a 30 km/h, nas mesmas condições de pista.",
+            answer: "CERTO",
+            explanation: "A distância de frenagem é proporcional ao quadrado da velocidade. Como 60/30 = 2, a distância aumenta 2² = 4 vezes.",
+          },
         ],
       },
       {
@@ -354,6 +806,20 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Álcool, celular e cansaço aumentam o tempo de reação",
           "Piso molhado reduz o coeficiente de atrito → maior distância de frenagem",
         ],
+        highlights: [
+          { type: "atencao", text: "Álcool aumenta o tempo de reação: a 60 km/h, cada 0,5 segundo extra de reação equivale a +8,3 metros percorridos ANTES de começar a frear." },
+          { type: "muito-cobrado", text: "Distância TOTAL de parada = distância de REAÇÃO + distância de FRENAGEM. A banca costuma perguntar sobre cada componente separadamente." },
+        ],
+        examples: [
+          { label: "Exemplo", sentence: "A 90 km/h (25 m/s) com reação de 1s: dr = 25 × 1 = 25 m. Com a = 5 m/s²: df = 625/10 = 62,5 m. Total: 87,5 m.", explanation: "Aplicação direta das fórmulas." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) O uso de aparelho celular ao volante não influencia a distância de parada do veículo.",
+            answer: "ERRADO",
+            explanation: "O celular aumenta o tempo de reação do condutor, o que aumenta a distância de reação e, consequentemente, a distância total de parada.",
+          },
+        ],
       },
       {
         id: "fis-energia-colisao",
@@ -368,6 +834,19 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Conservação do momento linear: m₁v₁ + m₂v₂ = (m₁+m₂)·vf",
           "Triângulo de segurança: afastar-se 30m (pista) e 100m (rodovia)",
           "Impacto a 60 km/h equivale a cair de um prédio de ~7 andares",
+        ],
+        highlights: [
+          { type: "muito-cobrado", text: "Ec ∝ v²: dobrar a velocidade → Ec quadruplica. A 120 km/h, a energia de impacto é 4 vezes maior que a 60 km/h." },
+        ],
+        examples: [
+          { label: "Exemplo", sentence: "Carro de 1.000 kg a 20 m/s: Ec = ½ × 1000 × 400 = 200.000 J = 200 kJ.", explanation: "Ec = ½mv²." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) Um veículo que passa de 60 km/h para 120 km/h tem sua energia cinética multiplicada por 2.",
+            answer: "ERRADO",
+            explanation: "Ec ∝ v². Como a velocidade dobrou, a Ec é multiplicada por 2² = 4, não por 2.",
+          },
         ],
       },
       {
@@ -384,9 +863,24 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Atrito estático > atrito cinético",
           "Peso: P = m·g (g ≈ 10 m/s² nas provas)",
         ],
+        highlights: [
+          { type: "atencao", text: "A 1ª Lei (inércia) explica por que o cinto de segurança é obrigatório: na frenagem brusca, o passageiro sem cinto continua em movimento e é projetado contra o para-brisa." },
+        ],
+        examples: [
+          { label: "Exemplo", sentence: "Caminhão de 10t e carro de 1t em colisão: pela 3ª Lei, as forças mútuas são iguais. Mas a aceleração do carro (a=F/m) é 10x maior (mais prejudicial).", explanation: "F=ma: mesma força, menor massa = maior aceleração." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) Em uma frenagem brusca, um passageiro sem cinto de segurança continuará se movendo para frente após o veículo parar, em decorrência da força de inércia.",
+            answer: "CERTO",
+            explanation: "Pela 1ª Lei de Newton (inércia), um corpo em movimento tende a continuar em movimento. Sem cinto, o passageiro continua se movendo para frente quando o veículo para abruptamente.",
+          },
+        ],
       },
     ],
   },
+
+  // ─── DIREITO ADMINISTRATIVO ──────────────────────────────────────────────────
   {
     id: "dir-administrativo",
     name: "Direito Administrativo",
@@ -409,6 +903,21 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Princípio da Autotutela: Adm. pode revogar/anular seus próprios atos",
           "Razoabilidade e Proporcionalidade: princípios implícitos cobrados pelo CEBRASPE",
         ],
+        highlights: [
+          { type: "memorize", text: "LIMPE: Legalidade, Impessoalidade, Moralidade, Publicidade, Eficiência. Esses são os 5 princípios EXPRESSOS no art. 37 da CF. Os demais (razoabilidade, proporcionalidade, autotutela) são implícitos." },
+          { type: "pegadinha", text: "Legalidade para a Adm. Pública é diferente da legalidade para o particular: o particular pode fazer tudo que a lei NÃO proíbe; a Adm. só pode fazer o que a lei PERMITE." },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "O princípio da eficiência foi inserido na Constituição Federal pela Emenda Constitucional n° 19, de 1998.", explanation: "Correto — antes da EC 19/1998 os princípios expressos eram apenas LIMP." },
+          { label: "ERRADO", sentence: "Pelo princípio da legalidade, a Administração Pública pode fazer tudo que a lei não proíbe.", explanation: "Essa premissa vale para o PARTICULAR, não para a Adm. Pública. A Adm. só pode agir se a lei AUTORIZAR." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE – PRF) O princípio da impessoalidade veda que o administrador público utilize a máquina estatal para promoção pessoal ou partidária.",
+            answer: "CERTO",
+            explanation: "A impessoalidade proíbe que o servidor use atos administrativos para promoção pessoal. O art. 37, §1° CF veda expressamente a propaganda que contenha nomes, símbolos ou imagens de autoridades.",
+          },
+        ],
       },
       {
         id: "da-atos",
@@ -424,6 +933,34 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Imperatividade: impõe obrigações independente da concordância",
           "Autoexecutoriedade: Adm. executa sem precisar do Judiciário (nem sempre)",
           "Vinculados × Discricionários: vinculado não tem margem; discricionário tem",
+        ],
+        highlights: [
+          { type: "memorize", text: "COMFIMO: Competência, Finalidade, Forma, Motivo, Objeto. Esses são os 5 elementos do ato. Só Competência, Finalidade e Forma são sempre vinculados." },
+          { type: "pegadinha", text: "Revogação = ato VÁLIDO (mérito) → efeitos EX NUNC (só para frente). Anulação = ato INVÁLIDO (ilegal) → efeitos EX TUNC (retroage). A banca inverte os conceitos." },
+        ],
+        tables: [
+          {
+            title: "Revogação × Anulação",
+            headers: ["Critério", "Revogação", "Anulação"],
+            rows: [
+              ["Motivo",       "Conveniência/oportunidade (mérito)", "Ilegalidade (vício de legalidade)"],
+              ["Ato",         "Ato VÁLIDO",                        "Ato INVÁLIDO"],
+              ["Efeitos",     "Ex nunc (não retroage)",            "Ex tunc (retroage à origem)"],
+              ["Quem revoga", "Administração (poder de autotutela)", "Adm. ou Judiciário"],
+              ["Direito adquirido", "Pode gerar",                  "Não gera (ato nulo)"],
+            ],
+          },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "A revogação de um ato administrativo produz efeitos apenas para o futuro, não atingindo situações já consolidadas.", explanation: "Efeito ex nunc — correto." },
+          { label: "ERRADO", sentence: "A anulação de ato administrativo ilegal só pode ser feita pelo Poder Judiciário.", explanation: "A Administração também pode anular seus próprios atos (autotutela — Súmulas 346 e 473 do STF)." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) Um ato administrativo discricionário praticado por agente competente, em conformidade com a lei e com a finalidade pública, pode ser revogado pela própria Administração por razões de conveniência e oportunidade.",
+            answer: "CERTO",
+            explanation: "O poder de autotutela permite que a Administração revogue atos válidos quando não mais convenientes. A discricionariedade não impede a revogação.",
+          },
         ],
       },
       {
@@ -441,6 +978,21 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Contratação direta: dispensa + inexigibilidade",
           "Improbidade administrativa se houver irregularidade grave em licitação",
         ],
+        highlights: [
+          { type: "atencao", text: "DISPENSA ≠ INEXIGIBILIDADE. Dispensa: competição POSSÍVEL, mas dispensada por valor ou situação. Inexigibilidade: competição INVIÁVEL (exclusividade, singular)." },
+          { type: "muito-cobrado", text: "Pregão é OBRIGATÓRIO para bens e serviços comuns. A outra modalidade comum é Concorrência (para obras e serviços de maior complexidade)." },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "A contratação de artista consagrado pela crítica especializada pode ser feita por inexigibilidade de licitação.", explanation: "Art. 74, III, d da Lei 14.133/2021." },
+          { label: "ERRADO", sentence: "O pregão pode ser utilizado para a contratação de obras de engenharia de qualquer complexidade.", explanation: "O pregão é exclusivo para bens e serviços comuns. Para obras, usa-se Concorrência." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) A inexigibilidade de licitação ocorre nas situações em que, embora viável a competição, o legislador optou por dispensar o procedimento licitatório.",
+            answer: "ERRADO",
+            explanation: "Essa é a definição de DISPENSA. Inexigibilidade ocorre quando a competição é INVIÁVEL — há apenas um fornecedor ou o objeto é singular e não permite comparação.",
+          },
+        ],
       },
       {
         id: "da-agentes",
@@ -455,6 +1007,20 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Demissão de servidor estável: processo administrativo ou judicial",
           "Acumulação de cargos: regra proibitiva; exceções = profissionais de saúde + magistério",
           "Subsídio: remuneração em parcela única (vedados adicionais — agentes políticos)",
+        ],
+        highlights: [
+          { type: "pegadinha", text: "Estabilidade ≠ Efetividade. O servidor aprovado em concurso é EFETIVO desde a posse; a ESTABILIDADE vem após 3 anos de exercício + avaliação especial de desempenho." },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "O servidor efetivo adquire estabilidade após 3 anos de efetivo exercício, desde que aprovado em avaliação especial de desempenho.", explanation: "Art. 41 CF/88 com a redação da EC 19/98." },
+          { label: "ERRADO", sentence: "O cargo em comissão exige aprovação em concurso público para sua investidura.", explanation: "Cargo em comissão é de livre nomeação (ad nutum) — não exige concurso." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) Um servidor público federal que ocupa cargo efetivo e que acumulou, de forma legal, outro cargo de magistério pode ser demitido sumariamente se cometer infração disciplinar grave.",
+            answer: "ERRADO",
+            explanation: "O servidor estável só pode ser demitido após processo administrativo disciplinar com ampla defesa e contraditório (art. 41, §1° CF). Não existe demissão sumária para servidor estável.",
+          },
         ],
       },
       {
@@ -472,6 +1038,21 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Omissão do Estado: STF — responsabilidade subjetiva (necessita culpa)",
           "Prescrição: 5 anos para ações contra o Estado",
         ],
+        highlights: [
+          { type: "muito-cobrado", text: "Estado = responsabilidade OBJETIVA (não precisa provar culpa). Agente = responsabilidade SUBJETIVA (precisa provar dolo ou culpa). A banca inverte os dois." },
+          { type: "pegadinha", text: "Para omissão do Estado, o STF firmou que a responsabilidade é SUBJETIVA (precisa provar a culpa do serviço — faute du service). A responsabilidade objetiva é para ações (atos comissivos)." },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "Um cidadão atropelado por viatura policial em serviço pode ser indenizado pelo Estado independentemente de culpa.", explanation: "Responsabilidade objetiva do Estado — art. 37, §6° CF." },
+          { label: "ERRADO", sentence: "O agente público que causa dano ao administrado com sua conduta responde objetivamente perante a vítima.", explanation: "O AGENTE responde SUBJETIVAMENTE (dolo ou culpa). É o ESTADO que responde objetivamente perante a vítima." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE – PRF) Em caso de dano causado por agente público no exercício de suas funções, o Estado responde de forma objetiva perante a vítima, podendo, posteriormente, acionar o agente regressivamente se ficar comprovado dolo ou culpa deste.",
+            answer: "CERTO",
+            explanation: "Art. 37, §6° CF: o Estado responde objetivamente (sem necessidade de provar culpa) perante a vítima. Em seguida, propõe ação de regresso contra o agente se comprovado dolo ou culpa.",
+          },
+        ],
       },
       {
         id: "da-improbidade",
@@ -487,9 +1068,26 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Prescrição: 8 anos a partir do término do exercício de cargo",
           "Legitimidade ativa: apenas o MP (cidadão perdeu a legitimidade)",
         ],
+        highlights: [
+          { type: "atencao", text: "Mudança fundamental pela Lei 14.230/2021: CULPA não configura mais improbidade. Apenas DOLO. A banca vai afirmar que 'culpa configura improbidade' — ERRADO agora." },
+          { type: "muito-cobrado", text: "Após 2021, somente o MINISTÉRIO PÚBLICO tem legitimidade para ajuizar ação de improbidade. O cidadão, associações e a Fazenda Pública perderam essa legitimidade." },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "Após a Lei 14.230/2021, somente o dolo configura ato de improbidade administrativa, sendo insuficiente a mera culpa.", explanation: "Mudança central da reforma de 2021." },
+          { label: "ERRADO", sentence: "Qualquer cidadão pode ajuizar ação de improbidade administrativa contra servidor público.", explanation: "Após 2021, apenas o Ministério Público tem legitimidade ativa para a ação de improbidade." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) Conforme a redação atual da Lei de Improbidade Administrativa, um servidor que, por negligência, causa dano ao erário pratica ato de improbidade administrativa.",
+            answer: "ERRADO",
+            explanation: "A Lei 14.230/2021 exige DOLO para configurar improbidade. A negligência (modalidade de culpa) não configura mais improbidade administrativa após essa reforma.",
+          },
+        ],
       },
     ],
   },
+
+  // ─── DIREITO CONSTITUCIONAL ──────────────────────────────────────────────────
   {
     id: "dir-constitucional",
     name: "Direito Constitucional",
@@ -511,6 +1109,34 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Regime de governo: Presidencialismo",
           "Art. 4: prevalência dos direitos humanos nas relações internacionais",
         ],
+        highlights: [
+          { type: "memorize", text: "FUNDAMENTOS (art. 1 — SCDVP): Soberania, Cidadania, Dignidade da pessoa humana, Valores sociais do trabalho e livre iniciativa, Pluralismo político. OBJETIVOS (art. 3): construir, garantir, erradicar, promover." },
+          { type: "pegadinha", text: "Fundamentos ≠ Objetivos. 'Erradicar a pobreza' é OBJETIVO (art. 3), não fundamento. 'Soberania' é FUNDAMENTO (art. 1), não objetivo. A banca troca os dois." },
+        ],
+        tables: [
+          {
+            title: "Art. 1° × Art. 3° da CF/88",
+            headers: ["Art. 1° — Fundamentos (SCDVP)", "Art. 3° — Objetivos"],
+            rows: [
+              ["Soberania",           "Construir sociedade livre, justa e solidária"],
+              ["Cidadania",           "Garantir o desenvolvimento nacional"],
+              ["Dignidade da pessoa humana", "Erradicar a pobreza e a marginalização"],
+              ["Valores sociais do trabalho", "Reduzir as desigualdades sociais e regionais"],
+              ["Pluralismo político", "Promover o bem de todos sem preconceitos"],
+            ],
+          },
+        ],
+        examples: [
+          { label: "ERRADO", sentence: "A erradicação da pobreza é um dos fundamentos da República Federativa do Brasil.", explanation: "Erradicar a pobreza é um OBJETIVO (art. 3), não fundamento (art. 1)." },
+          { label: "CERTO", sentence: "A dignidade da pessoa humana é um dos fundamentos da República, previsto no art. 1° da CF/88.", explanation: "Correto — é um dos 5 fundamentos do art. 1°." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE – PRF) De acordo com a CF/88, a promoção do bem de todos sem preconceito de origem, raça, sexo, cor, idade e quaisquer outras formas de discriminação constitui objetivo fundamental da República.",
+            answer: "CERTO",
+            explanation: "Art. 3°, IV da CF/88: 'promover o bem de todos, sem preconceitos de origem, raça, sexo, cor, idade e quaisquer outras formas de discriminação' é um dos objetivos fundamentais.",
+          },
+        ],
       },
       {
         id: "dc-direitos",
@@ -525,6 +1151,21 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "HC preventivo: salvo-conduto (ameaça à liberdade)",
           "HC liberatório: habeas corpus já preso ilegalmente",
           "Mandado de segurança: prazo de 120 dias do ato coator",
+        ],
+        highlights: [
+          { type: "muito-cobrado", text: "Remédios constitucionais (art. 5°): HC (locomoção), MS (liquidez e certeza), MI (norma faltante), HD (dados pessoais), AP (patrimônio público). O CEBRASPE cobra qual remédio se aplica a cada situação." },
+          { type: "pegadinha", text: "Mandado de Segurança tem prazo de 120 dias. Habeas Corpus é imprescritível. A banca afirma que o HC também tem prazo — ERRADO." },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "O Habeas Corpus pode ser impetrado por qualquer pessoa, em benefício próprio ou de terceiro, sem pagamento de custas.", explanation: "Art. 5°, LXVIII CF — gratuito e de legitimação ampla." },
+          { label: "ERRADO", sentence: "O mandado de injunção é o remédio constitucional adequado para proteger dados pessoais constantes de registros governamentais.", explanation: "Para dados pessoais, o remédio é o Habeas Data (HD), não o Mandado de Injunção." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) Um servidor público cujo salário foi reduzido ilegalmente, sem processo administrativo, deve impetrar habeas corpus para proteção de seu direito.",
+            answer: "ERRADO",
+            explanation: "Habeas corpus protege a liberdade de locomoção. Para direito líquido e certo violado por autoridade pública, o remédio correto é o Mandado de Segurança.",
+          },
         ],
       },
       {
@@ -541,6 +1182,34 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "HD: só para informações sobre o próprio impetrante",
           "AP: qualquer cidadão (no gozo dos direitos políticos) contra ato lesivo ao erário",
         ],
+        highlights: [
+          { type: "memorize", text: "Mnemônico dos remédios: HC = Habeas Corpus (locomoção); MS = Mandado Segurança (liquidez/certeza); MI = Mandado Injunção (omissão legislativa); HD = Habeas Data (dados); AP = Ação Popular (patrimônio)." },
+          { type: "atencao", text: "Ação Popular: só CIDADÃO (precisa estar no gozo dos direitos políticos). Não pode ser proposta por pessoa jurídica nem por estrangeiro. Prazo: 5 anos." },
+        ],
+        tables: [
+          {
+            title: "Remédios constitucionais — resumo comparativo",
+            headers: ["Remédio", "Protege", "Legitimidade ativa", "Prazo"],
+            rows: [
+              ["Habeas Corpus",  "Liberdade de locomoção", "Qualquer pessoa",       "Imprescritível"],
+              ["Mand. Segurança","Direito líquido e certo","Qualquer interessado",  "120 dias"],
+              ["Mand. Injunção", "Direito constitucional sem norma", "Titular do direito", "Imprescritível"],
+              ["Habeas Data",    "Informações pessoais",  "Titular dos dados",     "Imprescritível"],
+              ["Ação Popular",   "Patrimônio público",    "Cidadão (eleitor)",     "5 anos"],
+            ],
+          },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "O Mandado de Injunção é cabível quando a falta de norma regulamentadora tornar inviável o exercício de direito constitucional.", explanation: "Art. 5°, LXXI CF." },
+          { label: "ERRADO", sentence: "A Ação Popular pode ser proposta por qualquer pessoa física, mesmo que estrangeira.", explanation: "AP exige ser CIDADÃO (eleitor em gozo dos direitos políticos). Estrangeiro não tem essa legitimidade." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) O habeas corpus é o remédio adequado para impugnar ato de autoridade pública que afaste ilegalmente servidor de suas funções, sem processo administrativo.",
+            answer: "ERRADO",
+            explanation: "O afastamento ilegal de servidor não envolve liberdade de locomoção. O remédio correto é o Mandado de Segurança, para proteger direito líquido e certo.",
+          },
+        ],
       },
       {
         id: "dc-segpublica",
@@ -555,6 +1224,21 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "PC: polícia judiciária dos Estados (exceto militares)",
           "Polícia Penal: custódia de presos (EC 104/2019)",
           "PRF e PF: subordinadas ao Ministério da Justiça e Segurança Pública",
+        ],
+        highlights: [
+          { type: "muito-cobrado", text: "A PRF está prevista no art. 144, II da CF/88. Sua função constitucional é o PATRULHAMENTO OSTENSIVO das RODOVIAS FEDERAIS. Não julga, não investiga crimes em geral — fiscaliza rodovias." },
+          { type: "pegadinha", text: "Polícia Penal (EC 104/2019) é órgão de segurança pública criado para a custódia de presos. O CEBRASPE pode perguntar se ela está no art. 144 — SIM, foi adicionada pela EC 104/2019." },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "A Polícia Rodoviária Federal tem previsão constitucional expressa no art. 144 da CF/88, com competência para o patrulhamento ostensivo das rodovias federais.", explanation: "Art. 144, II e §2° CF." },
+          { label: "ERRADO", sentence: "A Polícia Civil é o órgão responsável pelo patrulhamento ostensivo em vias federais quando a PRF não está presente.", explanation: "A Polícia Civil é órgão estadual judiciário. O patrulhamento de rodovias federais é exclusivo da PRF." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE – PRF) A Polícia Rodoviária Federal, além do patrulhamento ostensivo das rodovias federais, pode exercer funções de polícia judiciária em qualquer parte do território nacional.",
+            answer: "ERRADO",
+            explanation: "A PRF tem competência constitucional para o patrulhamento ostensivo das rodovias federais. Funções de polícia judiciária em geral são da Polícia Federal e Polícias Civis.",
+          },
         ],
       },
       {
@@ -571,9 +1255,25 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "ADPF: descumprimento de preceito fundamental (subsidiária)",
           "Cláusulas pétreas: não podem ser abolidas nem por PEC",
         ],
+        highlights: [
+          { type: "pegadinha", text: "Controle DIFUSO é feito por qualquer juiz, tem efeito INTER PARTES (só entre as partes do processo). Controle CONCENTRADO é exclusivo do STF, efeito ERGA OMNES (para todos). A banca inverte os efeitos." },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "A ADI é ação que visa declarar a inconstitucionalidade de lei ou ato normativo federal ou estadual, com efeito vinculante e erga omnes.", explanation: "Correto — ADI é ação do controle concentrado no STF." },
+          { label: "ERRADO", sentence: "No controle difuso de constitucionalidade, a decisão produz efeito erga omnes, atingindo todos os jurisdicionados.", explanation: "Controle difuso = efeito INTER PARTES (entre as partes). Erga omnes é do controle concentrado." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) A arguição de descumprimento de preceito fundamental (ADPF) é ação de caráter subsidiário, cabível quando não houver outro meio eficaz para sanar a lesividade.",
+            answer: "CERTO",
+            explanation: "A ADPF tem natureza subsidiária (art. 4°, §1° da Lei 9.882/1999): só cabe quando não existir outro meio apto a sanar a inconstitucionalidade.",
+          },
+        ],
       },
     ],
   },
+
+  // ─── DIREITO PENAL ──────────────────────────────────────────────────────────
   {
     id: "dir-penal",
     name: "Direito Penal",
@@ -595,6 +1295,21 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Excludentes de culpabilidade: inimputabilidade, erro de proibição inevitável, coação moral irresistível",
           "Inimputável: menor de 18 anos e doente mental (sem discernimento)",
         ],
+        highlights: [
+          { type: "memorize", text: "Excludentes de ILICITUDE (justificantes): Legítima defesa, Estado de necessidade, Estrito cumprimento do dever legal, Exercício regular do direito. Agente pratica fato típico, mas NÃO é crime." },
+          { type: "pegadinha", text: "Excesso na legítima defesa é punível! Se o agente usa mais força do que o necessário para repelir a agressão, responde pelo excesso (doloso ou culposo)." },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "O policial que usa a força necessária para deter um suspeito que o ataca com faca age em legítima defesa.", explanation: "Estrito cumprimento do dever legal ou legítima defesa — ambos excluem a ilicitude." },
+          { label: "ERRADO", sentence: "O erro de tipo inevitável exclui a culpabilidade do agente.", explanation: "O erro de tipo inevitável exclui o DOLO e a CULPA, e portanto exclui a própria TIPICIDADE — não a culpabilidade." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) O agente que pratica o crime em legítima defesa não comete crime, pois a ilicitude de sua conduta fica excluída.",
+            answer: "CERTO",
+            explanation: "A legítima defesa é causa excludente de ilicitude (art. 23, II CP). Sem ilicitude, não há crime (falta elemento necessário da tripartição).",
+          },
+        ],
       },
       {
         id: "dp-iter",
@@ -609,6 +1324,20 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Redução de pena na tentativa: 1/3 a 2/3 (quanto mais próximo da consumação, menor a redução)",
           "Crimes que não admitem tentativa: culposos, preterdolosos, omissivos próprios, contravenções",
           "Arrependimento eficaz: impede o resultado → responde pelos atos praticados",
+        ],
+        highlights: [
+          { type: "pegadinha", text: "Desistência voluntária ≠ Tentativa. Na tentativa, o agente NÃO consegue consumar por causa alheia à sua vontade. Na desistência, ele PODE prosseguir, mas decide parar (ponte de ouro de Von Liszt)." },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "O ladrão que entra na casa para furtar mas desiste voluntariamente antes de subtrair qualquer coisa pratica desistência voluntária e responde apenas pela violação de domicílio.", explanation: "Desistência voluntária = responde pelos atos já praticados." },
+          { label: "ERRADO", sentence: "Crimes culposos admitem a forma tentada.", explanation: "Não é possível tentativa em crimes culposos, pois o agente não quer o resultado — falta o elemento subjetivo da tentativa." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) Aquele que inicia a execução de um homicídio mas desiste voluntariamente de consumá-lo responde apenas pelos atos já praticados, e não pela tentativa de homicídio.",
+            answer: "CERTO",
+            explanation: "Art. 15 CP: na desistência voluntária e no arrependimento eficaz, o agente só responde pelos atos já praticados. É a chamada 'ponte de ouro'.",
+          },
         ],
       },
       {
@@ -626,6 +1355,21 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Latrocínio (art. 157 §3º): 20 a 30 anos — crime hediondo; competência: JÚRI não julga",
           "Extorsão mediante sequestro com morte: crime hediondo, 24 a 30 anos",
         ],
+        highlights: [
+          { type: "pegadinha", text: "Latrocínio é julgado pelo JUIZ SINGULAR (vara criminal), não pelo Tribunal do Júri. O Júri julga apenas homicídios dolosos. Muitos candidatos erram isso." },
+          { type: "muito-cobrado", text: "Feminicídio é QUALIFICADORA do homicídio (art. 121 §2°, VI CP). Não é crime autônomo — é homicídio doloso qualificado. Pena: 12 a 30 anos." },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "O latrocínio, embora resulte em morte, não é julgado pelo Tribunal do Júri, pois se trata de crime contra o patrimônio.", explanation: "Júri julga apenas crimes dolosos contra a vida." },
+          { label: "ERRADO", sentence: "O furto qualificado praticado durante o repouso noturno tem pena de 1 a 4 anos.", explanation: "Furto qualificado tem pena de 2 a 8 anos (art. 155, §4° CP)." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) O crime de latrocínio deve ser julgado pelo Tribunal do Júri por resultar na morte da vítima.",
+            answer: "ERRADO",
+            explanation: "O Tribunal do Júri tem competência apenas para os crimes dolosos contra a vida (homicídio doloso, infanticídio, etc.). Latrocínio é crime contra o patrimônio — julgado pelo juiz singular.",
+          },
+        ],
       },
       {
         id: "dp-crimes-adm",
@@ -642,6 +1386,21 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Prevaricação: retarda/omite ato de ofício por interesse — 3 meses a 1 ano",
           "Abuso de autoridade (Lei 13.869/2019): dolo específico de prejudicar + ato que não seria praticado",
         ],
+        highlights: [
+          { type: "pegadinha", text: "Peculato culposo TEM uma peculiaridade: se o servidor REPARA o dano antes da sentença irrecorrível, a pena é REDUZIDA À METADE. Se repara antes da denúncia, a punibilidade é EXTINTA." },
+          { type: "memorize", text: "Corrupção PASSIVA = servidor que RECEBE. Corrupção ATIVA = particular que OFERECE. O servidor é passivo (recebe a corrupção); o particular é ativo (corrompe)." },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "O policial que solicita propina para não multar um condutor infrator pratica corrupção passiva.", explanation: "Art. 317 CP: servidor que solicita ou recebe vantagem indevida." },
+          { label: "ERRADO", sentence: "A prevaricação e a corrupção passiva têm a mesma pena mínima e máxima.", explanation: "Corrupção passiva: 2 a 12 anos. Prevaricação: 3 meses a 1 ano. São penas muito diferentes." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) O crime de peculato culposo se extingue se o autor reparar o dano antes do oferecimento da denúncia.",
+            answer: "CERTO",
+            explanation: "Art. 312, §3° CP: 'No caso do parágrafo anterior, a reparação do dano, se precede à sentença irrecorrível, extingue a punibilidade; se lhe é posterior, reduz de metade a pena imposta.'",
+          },
+        ],
       },
       {
         id: "dp-hediondos",
@@ -657,9 +1416,26 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Tortura e terrorismo: também equiparados",
           "Livramento condicional em hediondos: cumpridos 2/3 da pena (não reincidente)",
         ],
+        highlights: [
+          { type: "memorize", text: "Equiparados a hediondos (NÃO são hediondos, mas têm o mesmo tratamento): Tráfico de drogas, Tortura, Terrorismo (os '3 T's')." },
+          { type: "atencao", text: "Progressão de regime nos crimes hediondos: réu primário = 40% da pena; reincidente em crime hediondo = 60%. Esses percentuais foram alterados pelo Pacote Anticrime (Lei 13.964/2019)." },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "O tráfico de drogas não é considerado crime hediondo, mas é equiparado a hediondo pela CF/88.", explanation: "Art. 5°, XLIII CF: tráfico ilícito de entorpecentes é equiparado a hediondo." },
+          { label: "ERRADO", sentence: "Em crimes hediondos, é vedada a liberdade provisória em qualquer hipótese.", explanation: "O STF declarou inconstitucional a vedação absoluta à liberdade provisória em crimes hediondos. Analisa-se caso a caso." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) A tortura, o tráfico ilícito de entorpecentes e o terrorismo são crimes hediondos conforme a Lei 8.072/90.",
+            answer: "ERRADO",
+            explanation: "Tortura, tráfico e terrorismo são EQUIPARADOS a hediondos (art. 5°, XLIII CF), mas não são tecnicamente hediondos. Crimes hediondos são os listados na Lei 8.072/90.",
+          },
+        ],
       },
     ],
   },
+
+  // ─── DIREITO PROCESSUAL PENAL ────────────────────────────────────────────────
   {
     id: "dir-processual-penal",
     name: "Direito Processual Penal",
@@ -682,6 +1458,21 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "IP é dispensável: MP pode oferecer denúncia com outros elementos",
           "Notitia criminis: comunicação da infração penal à polícia",
         ],
+        highlights: [
+          { type: "muito-cobrado", text: "IP é procedimento ADMINISTRATIVO (não processo judicial). O delegado PRESIDE mas não julga. O MP é o titular da ação penal (não o delegado)." },
+          { type: "pegadinha", text: "O DELEGADO não pode arquivar o inquérito — isso cabe ao JUIZ, a pedido do MP. Se o MP requer o arquivamento e o juiz discorda, remete ao PGR/PGJ." },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "O inquérito policial pode ser dispensado quando o MP dispuser de elementos suficientes para oferecer a denúncia.", explanation: "O IP é dispensável — o MP pode oferecer denúncia com base em outros elementos de prova." },
+          { label: "ERRADO", sentence: "O delegado de polícia pode determinar o arquivamento do inquérito policial quando entender que não há indícios de autoria.", explanation: "O arquivamento do IP compete ao JUIZ, mediante requerimento do MP — nunca ao delegado." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) O inquérito policial tem natureza jurisdicional, razão pela qual as provas nele produzidas têm o mesmo valor das provas judiciais.",
+            answer: "ERRADO",
+            explanation: "O inquérito policial tem natureza ADMINISTRATIVA (pré-processual), não jurisdicional. As provas do IP servem de base para o oferecimento da denúncia, mas devem ser repetidas em juízo sob contraditório.",
+          },
+        ],
       },
       {
         id: "dpp-provas",
@@ -697,6 +1488,21 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Confissão: valor probatório relativo — não é rainha das provas",
           "Cadeia de custódia: conjunto de medidas para preservar a integridade da prova",
           "Interceptação telefônica: exige autorização judicial, prazo de 15 dias (renovável)",
+        ],
+        highlights: [
+          { type: "muito-cobrado", text: "Teoria dos frutos da árvore envenenada: prova ilícita contamina as derivadas. Ex: confissão obtida sob tortura + localização do cadáver com base na confissão → ambas ilícitas." },
+          { type: "pegadinha", text: "'In dubio pro reo' é na instrução (absolvição). 'In dubio pro societate' é na fase de pronúncia no Júri (manda a julgamento). Não confundir os momentos." },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "A prova obtida por meio de interceptação telefônica sem autorização judicial é ilícita e deve ser desentranhada dos autos.", explanation: "Art. 5°, LVI CF: são inadmissíveis as provas obtidas por meios ilícitos." },
+          { label: "ERRADO", sentence: "A confissão do réu, por si só, é suficiente para embasar uma condenação criminal.", explanation: "A confissão não é rainha das provas. O juiz pode absolver mesmo com confissão se não houver outros elementos de convicção (sistema do livre convencimento motivado)." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) Uma prova lícita descoberta exclusivamente a partir de uma confissão obtida mediante tortura é considerada prova ilícita por derivação.",
+            answer: "CERTO",
+            explanation: "Teoria dos frutos da árvore envenenada (art. 157, §1° CPP): são inadmissíveis as provas derivadas das ilícitas, salvo quando não evidenciado o nexo de causalidade ou quando puderem ser obtidas por uma fonte independente.",
+          },
         ],
       },
       {
@@ -714,9 +1520,37 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Liberdade provisória com fiança: autoridade policial pode conceder para crimes com pena até 4 anos",
           "Medidas cautelares alternativas devem ser preferidas à prisão preventiva",
         ],
+        highlights: [
+          { type: "memorize", text: "Espécies de flagrante: (1) Próprio (cometendo ou acabou de cometer); (2) Impróprio (perseguido logo após); (3) Presumido/Ficto (encontrado com instrumentos do crime pouco depois)." },
+          { type: "atencao", text: "Prisão temporária tem prazo FIXO (5+5 dias; hediondos: 30+30). Preventiva não tem prazo fixo. Se não houver justificativa para a preventiva, o réu deve ser solto." },
+        ],
+        tables: [
+          {
+            title: "Espécies de prisão processual",
+            headers: ["Espécie", "Prazo", "Autoridade", "Característica"],
+            rows: [
+              ["Flagrante",    "Até 24h (lavra auto)", "Policial (até delegado)", "Preso em ato/logo após"],
+              ["Temporária",  "5+5 dias (30+30 hediondo)", "Juiz (a pedido)", "Investigação de crimes graves"],
+              ["Preventiva",  "Sem prazo fixo",       "Juiz",              "Ordem pública, instrução, lei penal"],
+            ],
+          },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "A prisão em flagrante presumido ocorre quando o suspeito é encontrado, pouco tempo depois do crime, com objetos que indiquem ser ele o autor.", explanation: "Art. 302, IV CPP — flagrante ficto ou presumido." },
+          { label: "ERRADO", sentence: "A prisão preventiva pode ser decretada de ofício pelo juiz a qualquer tempo, mesmo sem requerimento do MP.", explanation: "Após o Pacote Anticrime (Lei 13.964/2019), a preventiva não pode ser decretada de ofício pelo juiz — exige requerimento do MP, delegado ou querelante." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) A prisão temporária pode ser decretada pelo juiz de ofício, independentemente de representação da autoridade policial ou requerimento do Ministério Público.",
+            answer: "ERRADO",
+            explanation: "A prisão temporária exige representação da autoridade policial OU requerimento do MP (Lei 7.960/89, art. 3°). O juiz não pode decretá-la de ofício.",
+          },
+        ],
       },
     ],
   },
+
+  // ─── LEGISLAÇÃO ESPECIAL PRF ─────────────────────────────────────────────────
   {
     id: "legislacao-especial",
     name: "Legislação Especial PRF",
@@ -738,6 +1572,20 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "PRF opera principalmente nas RODOVIAS FEDERAIS (não em vias estaduais/municipais)",
           "Lei 9.503/97 (CTB): base legal das atribuições de trânsito da PRF",
         ],
+        highlights: [
+          { type: "pegadinha", text: "PRF NÃO é subordinada à Polícia Federal. São órgãos distintos, ambos vinculados ao MJSP. O CEBRASPE afirma que 'a PRF é subordinada à PF' — ERRADO." },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "A Polícia Rodoviária Federal é órgão autônomo, distinto da Polícia Federal, ambos vinculados ao Ministério da Justiça.", explanation: "Correto — são carreiras e órgãos distintos." },
+          { label: "ERRADO", sentence: "O Policial Rodoviário Federal exerce suas funções em qualquer via pública do território nacional.", explanation: "A PRF atua principalmente nas RODOVIAS FEDERAIS." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE – PRF) A Polícia Rodoviária Federal é subordinada hierarquicamente à Polícia Federal no exercício de suas atribuições constitucionais.",
+            answer: "ERRADO",
+            explanation: "PRF e PF são órgãos autônomos e distintos. Ambos são vinculados ao Ministério da Justiça e Segurança Pública, mas não há subordinação da PRF à PF.",
+          },
+        ],
       },
       {
         id: "le-drogas",
@@ -753,6 +1601,21 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Associação para o tráfico (art. 35): 3 a 10 anos",
           "Financiamento do tráfico (art. 36): 8 a 20 anos",
           "Agravante: tráfico próximo a escolas, presídios, hospitais",
+        ],
+        highlights: [
+          { type: "muito-cobrado", text: "Usuário (art. 28): NÃO há pena privativa de liberdade — apenas advertência, prestação de serviços ou medida educativa. O CEBRASPE afirma que o usuário 'pode ser preso' — ERRADO." },
+          { type: "pegadinha", text: "Tráfico privilegiado (§4° do art. 33) PODE ser reconhecido mesmo se o réu for preso com quantidade razoável de droga, desde que atendidos os requisitos (primário, bons antecedentes, não integra organização)." },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "O usuário de drogas, nos termos do art. 28 da Lei 11.343/2006, não está sujeito à pena privativa de liberdade.", explanation: "Art. 28 prevê advertência, prestação de serviços e medida educativa — sem prisão." },
+          { label: "ERRADO", sentence: "O tráfico de drogas é crime hediondo, nos termos da Lei 8.072/90.", explanation: "Tráfico é EQUIPARADO a hediondo (art. 5°, XLIII CF), mas NÃO consta na lista da Lei 8.072/90. A distinção é técnica mas cobrada." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE – PRF) Conforme a Lei 11.343/2006, o porte de droga para consumo pessoal é conduta penalmente descriminalizada.",
+            answer: "ERRADO",
+            explanation: "O porte para uso pessoal (art. 28) foi DESPENALIZADO (sem pena privativa de liberdade), mas NÃO descriminalizado — continua sendo conduta ilícita e sujeita a sanções (advertência, prestação de serviços, medida educativa).",
+          },
         ],
       },
       {
@@ -770,10 +1633,25 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Deixar de identificar-se ao preso: crime de abuso",
           "Cumprimento do dever legal exclui o crime (excludente de ilicitude)",
         ],
+        highlights: [
+          { type: "muito-cobrado", text: "Abuso de autoridade exige DOLO ESPECÍFICO: prejudicar outrem, beneficiar a si ou terceiro, ou capricho/satisfação pessoal. Ato praticado por erro ou negligência NÃO configura abuso." },
+          { type: "atencao", text: "A Lei 13.869/2019 criou novos crimes e trouxe conflitos com o exercício policial. O agente que atua dentro dos limites legais NÃO pratica abuso — o excludente de ilicitude ('estrito cumprimento do dever legal') se aplica." },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "Um policial que prende alguém em flagrante de forma legal não pratica abuso de autoridade, mesmo que o preso reclame do procedimento.", explanation: "Cumprimento do dever legal exclui a ilicitude do abuso de autoridade." },
+          { label: "ERRADO", sentence: "O abuso de autoridade pode ser cometido de forma culposa, bastando a imprudência ou negligência do agente.", explanation: "O art. 1°, §1° da Lei 13.869/2019 exige dolo específico. Culpa não configura abuso de autoridade." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) O policial que, por excesso de cautela e sem má-fé, mantém preso por 2 horas a mais um suspeito que deveria ter sido solto pratica crime de abuso de autoridade.",
+            answer: "ERRADO",
+            explanation: "O abuso de autoridade exige dolo específico de prejudicar, beneficiar ou por capricho. O mero excesso por cautela, sem esse elemento subjetivo específico, não configura o crime.",
+          },
+        ],
       },
       {
         id: "le-estatuto-crianca",
-        title: "ECA — Estatuto da Criança e do Adolescente (Lei 8.069/90)",
+        title: "ECA — Estatuto da Criança e do Adolescente",
         incidencia: "média",
         content:
           "Criança: até 12 anos incompletos. Adolescente: 12 a 18 anos. O ECA adota a Doutrina da Proteção Integral.\n\nAto infracional: conduta descrita como crime ou contravenção praticada por menor. Medidas socioeducativas: advertência, obrigação de reparar o dano, prestação de serviços, liberdade assistida, semiliberdade, internação.\n\nInternação: máximo de 3 anos; liberação compulsória aos 21 anos.",
@@ -784,6 +1662,21 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Medidas socioeducativas: advertência, liberdade assistida, internação (máx. 3 anos)",
           "Liberação compulsória: 21 anos de idade",
           "Conselho Tutelar: não é órgão do Judiciário; é órgão municipal autônomo",
+        ],
+        highlights: [
+          { type: "pegadinha", text: "Criança = até 12 anos INCOMPLETOS (antes do aniversário de 12 anos). Com 12 anos feitos, já é adolescente. A banca afirma 'até 12 anos' sem especificar 'incompletos'." },
+          { type: "atencao", text: "Internação: prazo máximo de 3 anos para o mesmo ato infracional. Mas o adolescente é liberado compulsoriamente aos 21 anos, independentemente do saldo de internação." },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "O adolescente com 16 anos que comete homicídio pratica ato infracional análogo a crime, sujeito a medidas socioeducativas, e não à pena criminal.", explanation: "Menor de 18 anos é inimputável — responde pelo ECA." },
+          { label: "ERRADO", sentence: "A internação do adolescente infrator pode durar até 5 anos.", explanation: "A internação tem prazo máximo de 3 anos pelo mesmo ato infracional (art. 121, §3° ECA)." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) O Conselho Tutelar é órgão integrante do Poder Judiciário, responsável por zelar pelo cumprimento dos direitos da criança e do adolescente.",
+            answer: "ERRADO",
+            explanation: "O Conselho Tutelar é órgão autônomo, de caráter não jurisdicional, vinculado ao município (não ao Poder Judiciário). Tem natureza administrativa.",
+          },
         ],
       },
       {
@@ -800,9 +1693,26 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Escuta ambiental: captação por terceiro sem conhecimento dos interlocutores (requer autorização)",
           "Comunicações entre advogado e cliente: protegidas pelo sigilo profissional",
         ],
+        highlights: [
+          { type: "atencao", text: "Interceptação sem autorização judicial = crime de 2 a 4 anos + nulidade da prova. A prova obtida também é ilícita (fruto da árvore envenenada)." },
+          { type: "pegadinha", text: "Gravação clandestina (um dos interlocutores grava) ≠ interceptação (terceiro capta). Gravação clandestina em geral pode ser usada como prova, especialmente em legítima defesa." },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "A interceptação telefônica somente pode ser autorizada para investigação de crime punido com reclusão.", explanation: "Art. 2°, III da Lei 9.296/96 — crimes punidos apenas com detenção não admitem interceptação." },
+          { label: "ERRADO", sentence: "A interceptação telefônica pode ser determinada por delegado de polícia em caso de urgência.", explanation: "A interceptação SEMPRE exige autorização JUDICIAL — nunca pode ser determinada pelo delegado." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) Conforme a Lei 9.296/1996, a interceptação de comunicações telefônicas pode ser autorizada para investigar crimes punidos com detenção.",
+            answer: "ERRADO",
+            explanation: "Art. 2°, III da Lei 9.296/96: não será admitida interceptação quando o fato investigado constituir infração penal punida, no máximo, com pena de detenção. Apenas crimes punidos com reclusão admitem interceptação.",
+          },
+        ],
       },
     ],
   },
+
+  // ─── DIREITOS HUMANOS ────────────────────────────────────────────────────────
   {
     id: "direitos-humanos",
     name: "Direitos Humanos",
@@ -824,6 +1734,21 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Relatividade: podem ser limitados em conflito com outros direitos",
           "Histórico: Magna Carta (1215), Declaração francesa (1789), Declaração Universal (1948)",
         ],
+        highlights: [
+          { type: "memorize", text: "1ª geração = LIBERDADE (civis e políticos — 'não fazer' do Estado). 2ª geração = IGUALDADE (sociais — 'fazer' do Estado). 3ª geração = FRATERNIDADE (coletivos/difusos)." },
+          { type: "pegadinha", text: "Direitos de 1ª geração são 'negativos' porque exigem que o Estado se ABSTENHA (não torture, não prenda ilegalmente). Não são 'negativos' por serem ruins." },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "O direito à educação é classificado como direito de segunda geração, de natureza positiva, pois exige prestação do Estado.", explanation: "2ª geração = direitos sociais, que exigem ação do Estado." },
+          { label: "ERRADO", sentence: "A liberdade de expressão é direito de segunda geração.", explanation: "Liberdade de expressão é direito civil (1ª geração), de natureza negativa." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) Os direitos de terceira geração são chamados de direitos negativos por exigirem uma abstenção do Estado.",
+            answer: "ERRADO",
+            explanation: "Direitos NEGATIVOS são os de 1ª geração (civis e políticos), que exigem abstenção do Estado. Os de 3ª geração (fraternidade) são direitos coletivos e difusos, como o direito ao meio ambiente.",
+          },
+        ],
       },
       {
         id: "dh-dudh",
@@ -837,6 +1762,21 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "30 artigos — arts. 1-2: dignidade e igualdade; arts. 3-21: direitos civis e políticos; arts. 22-28: direitos econômicos e sociais",
           "Nenhum Estado pode invocar sua soberania para violar direitos humanos",
           "Base para os dois Pactos de 1966: PIDCP e PIDESC",
+        ],
+        highlights: [
+          { type: "muito-cobrado", text: "A DUDH NÃO é tratado — não tem força vinculante formal. É uma resolução da Assembleia Geral da ONU. Para ter força de lei, são necessários os tratados (Pactos de 1966)." },
+          { type: "memorize", text: "Data: 10 de dezembro de 1948. Resolução 217-A. 30 artigos. Dia 10 de dezembro = Dia Internacional dos Direitos Humanos." },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "A Declaração Universal dos Direitos Humanos foi adotada como resolução da Assembleia Geral da ONU, não tendo, portanto, força normativa vinculante formal.", explanation: "Correto — é soft law, não hard law (tratado)." },
+          { label: "ERRADO", sentence: "A DUDH é um tratado internacional que obriga os Estados a cumprirem suas disposições sob pena de sanções.", explanation: "A DUDH é resolução (não tratado) e não prevê sanções. A força vinculante vem dos tratados posteriores." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) A Declaração Universal dos Direitos Humanos, por ser um tratado internacional, vincula juridicamente todos os Estados-membros da ONU.",
+            answer: "ERRADO",
+            explanation: "A DUDH é uma resolução da Assembleia Geral da ONU, não um tratado. Portanto, não tem força vinculante formal de um tratado. Tratados de DH vinculantes são o PIDCP e o PIDESC (1966).",
+          },
         ],
       },
       {
@@ -852,6 +1792,21 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Comissão IDH: recebe petições individuais, medidas cautelares, relatórios",
           "Corte IDH: julgamento de casos submetidos pela Comissão — sentenças vinculantes",
           "Brasil já foi condenado pela Corte IDH (caso Damião Ximenes, Araguaia, etc.)",
+        ],
+        highlights: [
+          { type: "muito-cobrado", text: "Hierarquia da CADH no Brasil (STF — RE 349.703): SUPRALEGAL. Está acima das leis ordinárias mas abaixo da CF. Por isso a prisão civil por dívida foi abolida (a CADH a proíbe, exceto alimentos)." },
+          { type: "atencao", text: "Comissão IDH ≠ Corte IDH. A Comissão recebe denúncias, investiga e pode encaminhar à Corte. A Corte julga e emite sentenças vinculantes. O Brasil só reconheceu a jurisdição da Corte em 1998." },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "A Convenção Americana de Direitos Humanos tem hierarquia supralegal no Brasil, estando acima das leis ordinárias e abaixo da Constituição Federal.", explanation: "STF (RE 349.703): tratados de DH não aprovados pelo rito especial têm status supralegal." },
+          { label: "ERRADO", sentence: "A Corte Interamericana de Direitos Humanos integra o sistema onusiano de proteção.", explanation: "A Corte IDH integra o sistema INTERAMERICANO (OEA), não o sistema da ONU (onusiano)." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) A Comissão Interamericana de Direitos Humanos tem competência para julgar e emitir sentenças vinculantes contra os Estados que violem direitos humanos.",
+            answer: "ERRADO",
+            explanation: "Quem julga e emite sentenças vinculantes é a CORTE IDH. A Comissão tem função investigativa e pode encaminhar casos à Corte, mas não emite sentenças.",
+          },
         ],
       },
       {
@@ -869,9 +1824,26 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Código de Conduta para funcionários da Lei (ONU 1979): norteador da atividade policial",
           "Uso de algemas: STF Súmula Vinculante 11 — apenas em caso de resistência ou perigo à segurança",
         ],
+        highlights: [
+          { type: "muito-cobrado", text: "Súmula Vinculante 11 do STF: algemas só podem ser usadas em caso de resistência e de fundado receio de fuga ou de perigo à integridade física própria ou alheia. Uso abusivo = abuso de autoridade." },
+          { type: "memorize", text: "Tortura: proibição ABSOLUTA (jus cogens — norma imperativa do direito internacional). Não admite exceção, nem em estado de guerra, emergência ou qualquer outra circunstância." },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "O uso de algemas pelo policial é permitido apenas em situações de resistência do detento ou perigo à segurança, conforme a Súmula Vinculante 11 do STF.", explanation: "SV 11 STF." },
+          { label: "ERRADO", sentence: "Em situações de guerra, a proibição da tortura pode ser temporariamente suspensa por decreto de emergência.", explanation: "A proibição da tortura é absoluta (jus cogens) — não admite derrogação em nenhuma circunstância, nem em guerra ou emergência." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) Segundo a Súmula Vinculante n° 11 do STF, o uso de algemas em presos é sempre obrigatório para garantir a segurança dos agentes.",
+            answer: "ERRADO",
+            explanation: "A SV 11 estabelece que o uso de algemas é EXCEPCIONAL — permitido apenas em caso de resistência ou fundado receio de fuga ou perigo à integridade física. O uso indiscriminado configura abuso de autoridade.",
+          },
+        ],
       },
     ],
   },
+
+  // ─── INFORMÁTICA ─────────────────────────────────────────────────────────────
   {
     id: "informatica",
     name: "Informática",
@@ -894,6 +1866,21 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Periféricos de entrada: teclado, mouse, scanner, webcam",
           "Periféricos de saída: monitor, impressora, caixas de som",
         ],
+        highlights: [
+          { type: "pegadinha", text: "RAM é VOLÁTIL (perde dados ao desligar). HD/SSD são NÃO-VOLÁTEIS (guardam dados permanentemente). A banca troca os conceitos." },
+          { type: "memorize", text: "Periférico de ENTRADA: teclado, mouse, scanner, microfone, webcam, joystick. Periférico de SAÍDA: monitor, impressora, som. ENTRADA+SAÍDA: touchscreen, pen drive, modem." },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "A memória RAM é volátil, perdendo seu conteúdo quando o computador é desligado.", explanation: "RAM = Random Access Memory = memória de trabalho, volátil." },
+          { label: "ERRADO", sentence: "O SSD é um tipo de memória RAM de alta capacidade.", explanation: "SSD é armazenamento secundário (não volátil), não é RAM." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) O HD (Hard Disk) armazena dados de forma volátil, perdendo as informações quando o computador é desligado.",
+            answer: "ERRADO",
+            explanation: "O HD é memória secundária NÃO VOLÁTIL — mantém os dados mesmo sem energia. A memória VOLÁTIL é a RAM.",
+          },
+        ],
       },
       {
         id: "inf-windows",
@@ -908,6 +1895,20 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Linux — comandos básicos: ls (listar), cd (mudar dir.), mkdir (criar pasta), rm (remover), cp (copiar)",
           "Partições: formatação divide o HD — NTFS (Windows), ext4 (Linux), FAT32",
           "Bits e bytes: 1 byte = 8 bits; 1 KB = 1024 bytes; 1 MB = 1024 KB",
+        ],
+        highlights: [
+          { type: "dica", text: "Atalhos Windows mais cobrados: Ctrl+C (copiar), Ctrl+V (colar), Ctrl+Z (desfazer), Ctrl+Alt+Del (segurança/tarefas), Win+L (bloquear tela), Alt+F4 (fechar)." },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "No Linux, o comando 'ls' lista os arquivos e diretórios do diretório atual.", explanation: "Equivalente ao 'dir' do CMD do Windows." },
+          { label: "ERRADO", sentence: "O sistema operacional Linux é pago e proprietário da empresa RedHat.", explanation: "Linux é open-source e gratuito. A RedHat é uma das empresas que oferecem distribuições comerciais, mas o kernel Linux em si é livre." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) O sistema de arquivos NTFS é utilizado nativamente pelo sistema operacional Linux.",
+            answer: "ERRADO",
+            explanation: "NTFS é o sistema de arquivos padrão do Windows. O Linux utiliza nativamente ext4 (ou ext2/ext3). O Linux PODE ler NTFS, mas não o usa nativamente.",
+          },
         ],
       },
       {
@@ -925,6 +1926,21 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "PowerPoint: Ctrl+M (novo slide); F5 (iniciar apresentação)",
           "LibreOffice: versão gratuita — Writer (Word), Calc (Excel), Impress (PowerPoint)",
         ],
+        highlights: [
+          { type: "muito-cobrado", text: "Referência absoluta no Excel: $A$1 — o $ trava a linha e/ou coluna ao copiar a fórmula. $A1 = trava só a coluna; A$1 = trava só a linha; $A$1 = trava os dois." },
+          { type: "dica", text: "Função SE: =SE(condição; valor_se_verdadeiro; valor_se_falso). Exemplo: =SE(B2>=5;\"Aprovado\";\"Reprovado\"). Pode ser aninhada até 64 níveis." },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "No Excel, a fórmula =SOMA(A1:A5) soma os valores das células A1, A2, A3, A4 e A5.", explanation: "O operador ':' indica intervalo." },
+          { label: "ERRADO", sentence: "No Word, o atalho Ctrl+B serve para salvar o documento.", explanation: "Ctrl+B = negrito (Bold). Para salvar: Ctrl+S (Save)." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) No Microsoft Excel, ao inserir a fórmula =SE(A1>100;\"Alto\";\"Baixo\"), se o valor em A1 for 50, o resultado exibido será 'Alto'.",
+            answer: "ERRADO",
+            explanation: "50 não é maior que 100, portanto a condição é FALSA e o resultado é o terceiro argumento: 'Baixo'.",
+          },
+        ],
       },
       {
         id: "inf-internet",
@@ -934,28 +1950,42 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Protocolos: HTTP (hipertexto), HTTPS (seguro), FTP (transferência de arquivos), SMTP/POP3/IMAP (e-mail), DNS (resolução de nomes), DHCP (configuração automática de IP).\n\nNavegadores: Google Chrome, Mozilla Firefox, Microsoft Edge. Cache: armazenamento temporário de páginas. Cookies: arquivo com dados do usuário.\n\nRedes: topologias (estrela, barramento, anel, malha). Protocolos TCP/IP (IPv4 — 4 números; IPv6 — 128 bits).",
         keyPoints: [
           "HTTP (80) × HTTPS (443): HTTPS é criptografado (TLS/SSL)",
-          "SMTP (25/587): envio de e-mail; POP3 (110): baixa e-mail; IMAP (143): acesso ao servidor",
-          "DNS: converte nome de domínio em IP (ex.: www.google.com → 142.250.x.x)",
-          "DHCP: atribui IP automaticamente na rede",
-          "IPv4: 4 octetos (ex.: 192.168.0.1); IPv6: 128 bits em hexadecimal",
-          "VPN: rede privada virtual — criptografa a conexão",
-          "Firewall: filtra o tráfego de rede (entrada/saída)",
+          "DNS: converte domínios (google.com) em endereços IP",
+          "SMTP: envio de e-mail; POP3: recebimento (baixa e apaga); IMAP: acesso sincronizado",
+          "IPv4: 32 bits (4 grupos de até 3 dígitos); IPv6: 128 bits (8 grupos hexadecimais)",
+          "Firewall: controla tráfego de rede; VPN: rede privada virtual (criptografada)",
+          "Wi-Fi: padrão IEEE 802.11; Ethernet: cabo — IEEE 802.3",
         ],
-      },
-      {
-        id: "inf-seguranca",
-        title: "Segurança da Informação e LGPD",
-        incidencia: "alta",
-        content:
-          "Princípios da segurança da informação: Confidencialidade, Integridade, Disponibilidade, Autenticidade e Irretratabilidade (CIDAI).\n\nAmeaças: vírus (auto-replica em arquivo), worm (auto-replica sem arquivo hospedeiro), trojan (cavalo de troia, abre backdoor), ransomware (sequestra arquivos por criptografia), phishing (fraude por e-mail/site falso).\n\nLGPD (Lei 13.709/2018): protege dados pessoais. Titular tem direito de acesso, correção, exclusão, portabilidade.",
-        keyPoints: [
-          "CIA: Confidencialidade, Integridade, Disponibilidade — tríade básica",
-          "Vírus: precisa de arquivo hospedeiro para se propagar",
-          "Worm: propaga sozinho pela rede, sem hospedeiro",
-          "Ransomware: criptografa arquivos e exige resgate",
-          "Phishing: e-mail ou site falso para roubar credenciais",
-          "LGPD: dados pessoais só podem ser tratados com base legal (consentimento, legítimo interesse, etc.)",
-          "ANPD: Autoridade Nacional de Proteção de Dados — órgão de fiscalização da LGPD",
+        highlights: [
+          { type: "muito-cobrado", text: "HTTP (porta 80) vs HTTPS (porta 443): HTTPS usa criptografia TLS/SSL. Sites com HTTPS têm o cadeado no navegador. O CEBRASPE cobra a diferença de segurança." },
+          { type: "pegadinha", text: "POP3 baixa os e-mails e os remove do servidor. IMAP mantém os e-mails no servidor e sincroniza em vários dispositivos. A banca troca as definições." },
+        ],
+        tables: [
+          {
+            title: "Protocolos de rede e suas funções",
+            headers: ["Protocolo", "Porta", "Função"],
+            rows: [
+              ["HTTP",  "80",  "Transferência de páginas web (sem criptografia)"],
+              ["HTTPS", "443", "HTTP seguro (com criptografia TLS/SSL)"],
+              ["FTP",   "21",  "Transferência de arquivos"],
+              ["SMTP",  "25",  "Envio de e-mail"],
+              ["POP3",  "110", "Recebimento de e-mail (remove do servidor)"],
+              ["IMAP",  "143", "Recebimento de e-mail (mantém no servidor)"],
+              ["DNS",   "53",  "Resolução de nomes de domínio para IP"],
+              ["DHCP",  "67/68","Configuração automática de IP"],
+            ],
+          },
+        ],
+        examples: [
+          { label: "CERTO", sentence: "O protocolo HTTPS utiliza criptografia para proteger a comunicação entre o navegador e o servidor web.", explanation: "HTTPS = HTTP + TLS/SSL = comunicação segura." },
+          { label: "ERRADO", sentence: "O protocolo POP3 mantém os e-mails no servidor para acesso sincronizado em múltiplos dispositivos.", explanation: "POP3 baixa os e-mails e remove do servidor. Quem mantém sincronizado é o IMAP." },
+        ],
+        exercises: [
+          {
+            question: "(CEBRASPE) O protocolo DNS é responsável pelo envio seguro de e-mails entre servidores de correio eletrônico.",
+            answer: "ERRADO",
+            explanation: "DNS (Domain Name System) resolve nomes de domínio para endereços IP. O protocolo responsável pelo envio de e-mails é o SMTP.",
+          },
         ],
       },
     ],
