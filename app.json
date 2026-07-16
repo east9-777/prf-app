@@ -1,74 +1,38 @@
 {
   "expo": {
     "name": "Project P.R.F",
-    "slug": "project-prf",
+    "slug": "prf-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "project-prf",
-    "userInterfaceStyle": "dark",
+    "scheme": "prf-app",
+    "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/splash.png",
+      "image": "./assets/images/icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#0D1117"
+      "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": false,
-      "bundleIdentifier": "com.leivison.prfapp",
-      "infoPlist": {
-        "NSPhotoLibraryUsageDescription": "Precisamos de acesso à sua galeria para você escolher uma foto de perfil.",
-        "NSCameraUsageDescription": "Usamos a câmera para capturar sua foto de perfil."
-      }
+      "supportsTablet": false
     },
-    "android": {
-      "package": "com.leivison.prfapp",
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/images/icon.png",
-        "backgroundColor": "#0D1117"
-      },
-      "permissions": [
-        "android.permission.READ_MEDIA_IMAGES",
-        "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.RECEIVE_BOOT_COMPLETED",
-        "android.permission.VIBRATE",
-        "android.permission.POST_NOTIFICATIONS",
-        "android.permission.INTERNET"
-      ]
-    },
+    "android": {},
     "web": {
       "favicon": "./assets/images/icon.png"
     },
     "plugins": [
-      "expo-router",
-      "expo-font",
-      "expo-web-browser",
-      "@react-native-google-signin/google-signin",
       [
-        "expo-notifications",
+        "expo-router",
         {
-          "icon": "./assets/images/icon.png",
-          "color": "#1565C0",
-          "sounds": [],
-          "mode": "production"
+          "origin": "https://replit.com/"
         }
       ],
-      [
-        "expo-image-picker",
-        {
-          "photosPermission": "Precisamos de acesso à sua galeria para você escolher uma foto de perfil."
-        }
-      ]
+      "expo-font",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    },
-    "extra": {
-      "eas": {
-        "projectId": "b90df6e5-b419-4c6b-b7c4-1328263a54e6"
-      }
     }
   }
 }

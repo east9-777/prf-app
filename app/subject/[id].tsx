@@ -1,285 +1,199 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useState } from 'react';
 import {
-  FlatList,
   Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
-} from "react-native";
-import { Feather } from "@expo/vector-icons";
-import * as Haptics from "expo-haptics";
-import { Stack, useFocusEffect, useLocalSearchParams } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useColors } from "@/hooks/useColors";
-import { MOCK_SUBJECTS } from "@/lib/mockData";
-import { getData, storeData, STORAGE_KEYS } from "@/lib/storage";
-import type { Topic } from "@/lib/types";
+} from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useColors } from '@/hooks/useColors';
+import { CONTEUDO_SUBJECTS } from '@/lib/conteudoData';
+import { getData, storeData, STORAGE_KEYS } from '@/lib/storage';
+import type { ProgressMap } from '@/lib/types';
 
-type ProgressMap = Record<string, boolean>;
-
-export default function SubjectScreen() {
+export default function SubjectDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const [progress, setProgress] = useState<ProgressMap>({});
 
-  const subject = useMemo(
-    () => MOCK_SUBJECTS.find((s) => s.id === id),
-    [id]
-  );
+  const subject = CONTEUDO_SUBJECTS.find((s) => s.id === id);
 
   useFocusEffect(
     useCallback(() => {
       getData<ProgressMap>(STORAGE_KEYS.STUDY_PROGRESS).then((p) => {
         if (p) setProgress(p);
+        else setProgress({});
       });
     }, [])
   );
 
   const toggleTopic = async (topicId: string) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    const updated = {
-      ...progress,
-      [topicId]: !progress[topicId],
-    };
-    setProgress(updated);
-    await storeData(STORAGE_KEYS.STUDY_PROGRESS, updated);
-  };
-
-  const markAll = async () => {
-    if (!subject) return;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    const allDone = subject.topics.every((t) => progress[t.id]);
-    const updated = { ...progress };
-    subject.topics.forEach((t) => {
-      updated[t.id] = !allDone;
-    });
+    const updated: ProgressMap = { ...progress, [topicId]: !progress[topicId] };
     setProgress(updated);
     await storeData(STORAGE_KEYS.STUDY_PROGRESS, updated);
   };
 
   if (!subject) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
-        <Stack.Screen options={{ title: "Matéria" }} />
-        <Text style={{ color: colors.text, textAlign: "center", marginTop: 40 }}>
-          Matéria não encontrada.
-        </Text>
+      <View style={[styles.container, { backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center' }]}>
+        <Stack.Screen options={{ title: 'Matéria' }} />
+        <Text style={{ color: colors.text }}>Matéria não encontrada.</Text>
       </View>
     );
   }
 
   const done = subject.topics.filter((t) => !!progress[t.id]).length;
-  const total = subject.topics.length;
-  const pct = total > 0 ? done / total : 0;
-
-  const renderTopic = ({ item }: { item: Topic }) => {
-    const isChecked = !!progress[item.id];
-    return (
-      <TouchableOpacity
-        style={[
-          styles.topicRow,
-          { borderBottomColor: colors.border },
-        ]}
-        onPress={() => toggleTopic(item.id)}
-        activeOpacity={0.7}
-      >
-        <View
-          style={[
-            styles.checkbox,
-            {
-              backgroundColor: isChecked ? subject.color : "transparent",
-              borderColor: isChecked ? subject.color : colors.border,
-            },
-          ]}
-        >
-          {isChecked && (
-            <Feather name="check" size={13} color="#FFFFFF" />
-          )}
-        </View>
-        <Text
-          style={[
-            styles.topicName,
-            {
-              color: isChecked ? colors.mutedForeground : colors.text,
-              textDecorationLine: isChecked ? "line-through" : "none",
-            },
-          ]}
-        >
-          {item.name}
-        </Text>
-      </TouchableOpacity>
-    );
-  };
+  const pct = subject.topics.length > 0 ? done / subject.topics.length : 0;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Stack.Screen
         options={{
           title: subject.name,
-          headerStyle: { backgroundColor: colors.background },
-          headerTintColor: colors.text,
-          headerShadowVisible: false,
-          headerBackTitle: "Estudos",
+          headerTintColor: subject.color,
         }}
       />
-
-      <FlatList
-        data={subject.topics}
-        keyExtractor={(item) => item.id}
-        renderItem={renderTopic}
-        ListHeaderComponent={
-          <View style={styles.listHeader}>
-            <View
-              style={[
-                styles.progressCard,
-                {
-                  backgroundColor: colors.card,
-                  borderColor: colors.border,
-                  borderLeftColor: subject.color,
-                },
-              ]}
-            >
-              <View style={styles.progressTop}>
-                <View>
-                  <Text style={[styles.progressCount, { color: colors.text }]}>
-                    {done}
-                    <Text style={{ color: colors.mutedForeground, fontSize: 16 }}>
-                      /{total}
-                    </Text>
-                  </Text>
-                  <Text style={[styles.progressLabel, { color: colors.mutedForeground }]}>
-                    assuntos estudados
-                  </Text>
-                </View>
-                <Text style={[styles.pctText, { color: subject.color }]}>
-                  {Math.round(pct * 100)}%
-                </Text>
-              </View>
-              <View style={[styles.bar, { backgroundColor: colors.border }]}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={[
+          styles.scroll,
+          { paddingBottom: insets.bottom + (Platform.OS === 'web' ? 34 : 16) + 60 },
+        ]}
+      >
+        {/* Progress Card */}
+        <View style={[styles.progressCard, { backgroundColor: subject.color + '14', borderColor: subject.color + '30' }]}>
+          <View style={styles.progressTop}>
+            <View style={[styles.subjectIcon, { backgroundColor: subject.color + '22' }]}>
+              <Feather name={subject.icon as any} size={22} color={subject.color} />
+            </View>
+            <View style={{ flex: 1, gap: 5 }}>
+              <Text style={[styles.subjectName, { color: subject.color }]}>{subject.name}</Text>
+              <View style={[styles.pBar, { backgroundColor: subject.color + '22' }]}>
                 <View
-                  style={[
-                    styles.barFill,
-                    { width: `${pct * 100}%`, backgroundColor: subject.color },
-                  ]}
+                  style={[styles.pFill, { width: `${pct * 100}%` as any, backgroundColor: subject.color }]}
                 />
               </View>
+              <Text style={styles.pLabel}>{done}/{subject.topics.length} tópicos estudados</Text>
             </View>
+          </View>
+          <Pressable
+            style={[styles.viewAulaBtn, { borderColor: subject.color }]}
+            onPress={() => router.push(`/aulas/${id}` as any)}
+          >
+            <Feather name="layers" size={14} color={subject.color} />
+            <Text style={[styles.viewAulaBtnText, { color: subject.color }]}>Ver aulas completas</Text>
+          </Pressable>
+        </View>
 
-            <TouchableOpacity
-              style={[
-                styles.markAllBtn,
+        {/* Topics */}
+        <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>
+          MARQUE OS TÓPICOS ESTUDADOS
+        </Text>
+        {subject.topics.map((topic) => {
+          const isDone = !!progress[topic.id];
+          const incidenciaColor = topic.incidencia === 'alta' ? '#EF4444' : topic.incidencia === 'média' ? '#F59E0B' : '#9E9E9E';
+          return (
+            <Pressable
+              key={topic.id}
+              style={({ pressed }) => [
+                styles.topicRow,
                 {
-                  borderColor: subject.color,
-                  backgroundColor: subject.color + "12",
+                  backgroundColor: isDone ? subject.color + '0C' : colors.card,
+                  borderColor: isDone ? subject.color + '40' : colors.border,
+                  opacity: pressed ? 0.88 : 1,
                 },
               ]}
-              onPress={markAll}
+              onPress={() => toggleTopic(topic.id)}
             >
-              <Feather
-                name={pct === 1 ? "x-square" : "check-square"}
-                size={16}
-                color={subject.color}
-              />
-              <Text style={[styles.markAllText, { color: subject.color }]}>
-                {pct === 1
-                  ? "Desmarcar todos"
-                  : "Marcar todos como estudados"}
-              </Text>
-            </TouchableOpacity>
-
-            <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>
-              ASSUNTOS
-            </Text>
-          </View>
-        }
-        contentContainerStyle={[
-          styles.list,
-          { paddingBottom: insets.bottom + (Platform.OS === "web" ? 34 : 0) + 24 },
-        ]}
-        showsVerticalScrollIndicator={false}
-      />
+              <View
+                style={[
+                  styles.checkbox,
+                  {
+                    backgroundColor: isDone ? subject.color : 'transparent',
+                    borderColor: isDone ? subject.color : colors.border,
+                  },
+                ]}
+              >
+                {isDone && <Feather name="check" size={12} color="#FFFFFF" />}
+              </View>
+              <View style={{ flex: 1, gap: 4 }}>
+                <Text
+                  style={[
+                    styles.topicTitle,
+                    { color: isDone ? subject.color : colors.text },
+                  ]}
+                >
+                  {topic.title}
+                </Text>
+                <Text style={[styles.topicIncidencia, { color: incidenciaColor }]}>
+                  Incidência {topic.incidencia}
+                </Text>
+              </View>
+              {isDone && (
+                <View style={[styles.doneBadge, { backgroundColor: subject.color + '18' }]}>
+                  <Text style={[styles.doneBadgeText, { color: subject.color }]}>✓ Estudado</Text>
+                </View>
+              )}
+            </Pressable>
+          );
+        })}
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  list: {},
-  listHeader: { padding: 16, gap: 12 },
-  progressCard: {
-    borderRadius: 12,
-    borderWidth: 1,
-    borderLeftWidth: 4,
-    padding: 16,
-    gap: 12,
-  },
-  progressTop: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-  },
-  progressCount: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 28,
-  },
-  progressLabel: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 13,
-  },
-  pctText: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 28,
-  },
-  bar: {
-    height: 6,
-    borderRadius: 3,
-    overflow: "hidden",
-  },
-  barFill: {
-    height: "100%",
-    borderRadius: 3,
-  },
-  markAllBtn: {
-    flexDirection: "row",
-    alignItems: "center",
+  scroll: { padding: 16, gap: 12 },
+  progressCard: { borderRadius: 14, borderWidth: 1, padding: 14, gap: 12 },
+  progressTop: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
+  subjectIcon: { width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  subjectName: { fontFamily: 'Inter_600SemiBold', fontSize: 14 },
+  pBar: { height: 5, borderRadius: 3, overflow: 'hidden' },
+  pFill: { height: '100%', borderRadius: 3 },
+  pLabel: { fontFamily: 'Inter_400Regular', fontSize: 11, color: '#757575' },
+  viewAulaBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     gap: 8,
-    paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 10,
     borderWidth: 1,
-    alignSelf: "flex-start",
   },
-  markAllText: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 13,
-  },
+  viewAulaBtnText: { fontFamily: 'Inter_600SemiBold', fontSize: 13 },
   sectionLabel: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 11,
-    letterSpacing: 1,
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 10,
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    marginTop: 4,
+    marginLeft: 2,
   },
   topicRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderBottomWidth: StyleSheet.hairlineWidth,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 14,
+    borderRadius: 12,
+    borderWidth: 1,
   },
   checkbox: {
     width: 22,
     height: 22,
     borderRadius: 6,
-    borderWidth: 1.5,
-    alignItems: "center",
-    justifyContent: "center",
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  topicName: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 15,
-    flex: 1,
-  },
+  topicTitle: { fontFamily: 'Inter_500Medium', fontSize: 14 },
+  topicIncidencia: { fontFamily: 'Inter_400Regular', fontSize: 11 },
+  doneBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 20 },
+  doneBadgeText: { fontFamily: 'Inter_500Medium', fontSize: 11 },
 });

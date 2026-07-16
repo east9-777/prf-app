@@ -1,281 +1,176 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
   Image,
+  KeyboardAvoidingView,
   Platform,
   Pressable,
-  StatusBar,
+  ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
-} from "react-native";
-import * as WebBrowser from "expo-web-browser";
-import { LinearGradient } from "expo-linear-gradient";
-import { Feather } from "@expo/vector-icons";
-import * as Haptics from "expo-haptics";
-import { useRouter } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useAuth } from "@/context/AuthContext";
-import { useColors } from "@/hooks/useColors";
-
-WebBrowser.maybeCompleteAuthSession();
-
-const FEATURES = [
-  { icon: "book-open" as const, text: "Materiais e estudos organizados" },
-  { icon: "clipboard" as const, text: "Simulados com questões reais" },
-  { icon: "users" as const, text: "Comunidade de candidatos" },
-  { icon: "trending-up" as const, text: "Acompanhe seu progresso" },
-];
-
-function GoogleButton({
-  onPress,
-  loading,
-}: {
-  onPress: () => void;
-  loading: boolean;
-}) {
-  return (
-    <Pressable
-      style={({ pressed }) => [
-        styles.googleBtn,
-        { opacity: pressed ? 0.85 : 1 },
-      ]}
-      onPress={onPress}
-      disabled={loading}
-    >
-      {loading ? (
-        <ActivityIndicator color="#1565C0" size="small" />
-      ) : (
-        <>
-          <View style={styles.gIconBox}>
-            <Text style={styles.gIconText}>G</Text>
-          </View>
-          <Text style={styles.googleBtnText}>Entrar com Google</Text>
-        </>
-      )}
-    </Pressable>
-  );
-}
+} from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useColors } from '@/hooks/useColors';
+import { useAuth } from '@/context/AuthContext';
 
 export default function LoginScreen() {
   const colors = useColors();
-  const { signInWithGoogle, user } = useAuth();
   const insets = useSafeAreaInsets();
-  const router = useRouter();
+  const { signIn } = useAuth();
+  const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (user) {
-      if (user.username) {
-        router.replace("/(tabs)");
-      } else {
-        router.replace("/setup-username");
-      }
+  const handleLogin = async () => {
+    const trimmed = username.trim();
+    if (trimmed.length < 2) {
+      setError('Digite um nome com pelo menos 2 caracteres.');
+      return;
     }
-  }, [user]);
-
-  const handleSignIn = async () => {
-    try {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      setLoading(true);
-
-      if (Platform.OS === "web") {
-        await signInWithGoogle();
-      } else {
-        const { GoogleSignin } = await import(
-          "@react-native-google-signin/google-signin"
-        );
-        GoogleSignin.configure({
-          webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
-          androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
-          offlineAccess: false,
-          scopes: ["email", "profile"],
-        });
-        await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-        const response = await GoogleSignin.signIn();
-        const idToken = response.data?.idToken ?? (response as any).idToken;
-        if (!idToken) throw new Error("ID token não recebido.");
-        await signInWithGoogle(idToken);
-      }
-    } catch (err: any) {
-      if (err?.code !== "SIGN_IN_CANCELLED" && err?.code !== -5) {
-        Alert.alert("Erro ao entrar", err?.message ?? "Tente novamente.");
-      }
-    } finally {
-      setLoading(false);
-    }
+    setLoading(true);
+    setError('');
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    await signIn(trimmed);
+    setLoading(false);
   };
 
   return (
-    <View style={styles.root}>
-      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
-
-      <LinearGradient
-        colors={["#0A1628", "#0D1117", "#0D1117"]}
-        style={StyleSheet.absoluteFill}
-      />
-
-      <View style={[styles.logoSection, { paddingTop: insets.top + 32 }]}>
-        <View style={styles.logoBadge}>
-          <Image
-            source={require("@/assets/images/logo.png")}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-        </View>
-        <Text style={styles.appName}>Project P.R.F</Text>
-        <Text style={styles.appSub}>Polícia Rodoviária Federal</Text>
-      </View>
-
-      <View
-        style={[
-          styles.card,
-          { paddingBottom: insets.bottom + 24 },
-        ]}
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <View style={styles.divider} />
+        <ScrollView
+          contentContainerStyle={[
+            styles.scroll,
+            {
+              paddingTop: insets.top + (Platform.OS === 'web' ? 67 : 60),
+              paddingBottom: insets.bottom + 40,
+            },
+          ]}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Logo */}
+          <View style={styles.logoSection}>
+            <Image
+              source={require('@/assets/images/prf-badge.jpg')}
+              style={styles.badgeImage}
+              resizeMode="contain"
+            />
+            <Text style={[styles.appName, { color: colors.text }]}>
+              Project <Text style={{ color: colors.primary }}>P.R.F</Text>
+            </Text>
+            <Text style={[styles.appSubtitle, { color: colors.mutedForeground }]}>
+              Preparatório para o concurso da{'\n'}Polícia Rodoviária Federal
+            </Text>
+          </View>
 
-        <Text style={styles.cardTitle}>Preparatório completo</Text>
+          {/* Form */}
+          <View style={[styles.formCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <Text style={[styles.formTitle, { color: colors.text }]}>Entrar no app</Text>
+            <Text style={[styles.formSubtitle, { color: colors.mutedForeground }]}>
+              Digite um nome de usuário para começar seus estudos
+            </Text>
 
-        <View style={styles.features}>
-          {FEATURES.map((f) => (
-            <View key={f.text} style={styles.featureRow}>
-              <View style={styles.featureIcon}>
-                <Feather name={f.icon} size={14} color="#1976D2" />
-              </View>
-              <Text style={styles.featureText}>{f.text}</Text>
+            <View style={[styles.inputWrap, { borderColor: error ? '#C62828' : colors.border, backgroundColor: colors.background }]}>
+              <Feather name="user" size={16} color={colors.mutedForeground} />
+              <TextInput
+                value={username}
+                onChangeText={(t) => { setUsername(t); setError(''); }}
+                placeholder="Seu nome de usuário"
+                placeholderTextColor={colors.mutedForeground}
+                style={[styles.input, { color: colors.text }]}
+                autoCapitalize="none"
+                autoCorrect={false}
+                returnKeyType="done"
+                onSubmitEditing={handleLogin}
+              />
             </View>
-          ))}
-        </View>
+            {error.length > 0 && (
+              <Text style={styles.errorText}>{error}</Text>
+            )}
 
-        <GoogleButton onPress={handleSignIn} loading={loading} />
+            <Pressable
+              style={({ pressed }) => [
+                styles.loginBtn,
+                { backgroundColor: colors.primary, opacity: pressed || loading ? 0.8 : 1 },
+              ]}
+              onPress={handleLogin}
+              disabled={loading}
+            >
+              <Text style={styles.loginBtnText}>
+                {loading ? 'Entrando...' : 'Começar estudar'}
+              </Text>
+              {!loading && <Feather name="arrow-right" size={18} color="#FFFFFF" />}
+            </Pressable>
+          </View>
 
-        <Text style={styles.disclaimer}>
-          Ao entrar, você concorda com os termos de uso e política de
-          privacidade do Project P.R.F
-        </Text>
-      </View>
+          {/* Features */}
+          <View style={styles.features}>
+            {[
+              { icon: 'layers', text: 'Aulas completas com exemplos e exercícios' },
+              { icon: 'clipboard', text: 'Simulados estilo CEBRASPE' },
+              { icon: 'book-open', text: 'Acompanhe seu progresso por matéria' },
+            ].map((f) => (
+              <View key={f.text} style={styles.featureRow}>
+                <View style={[styles.featureIcon, { backgroundColor: colors.primary + '18' }]}>
+                  <Feather name={f.icon as any} size={14} color={colors.primary} />
+                </View>
+                <Text style={[styles.featureText, { color: colors.mutedForeground }]}>{f.text}</Text>
+              </View>
+            ))}
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#0D1117" },
-
-  logoSection: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
+  container: { flex: 1 },
+  scroll: { paddingHorizontal: 24, gap: 28 },
+  logoSection: { alignItems: 'center', gap: 12 },
+  badgeImage: {
+    width: 140,
+    height: 140,
+    borderRadius: 16,
   },
-  logoBadge: {
-    width: 160,
-    height: 160,
-    borderRadius: 32,
-    backgroundColor: "#161B22",
+  appName: { fontFamily: 'Inter_700Bold', fontSize: 30, letterSpacing: -0.5 },
+  appSubtitle: { fontFamily: 'Inter_400Regular', fontSize: 14, textAlign: 'center', lineHeight: 20 },
+  formCard: {
+    borderRadius: 18,
     borderWidth: 1,
-    borderColor: "#1565C040",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#1565C0",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.25,
-    shadowRadius: 24,
-    elevation: 12,
+    padding: 20,
+    gap: 14,
   },
-  logo: { width: 130, height: 130 },
-  appName: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 28,
-    color: "#E6EDF3",
-    letterSpacing: -0.5,
-    marginTop: 8,
+  formTitle: { fontFamily: 'Inter_700Bold', fontSize: 18 },
+  formSubtitle: { fontFamily: 'Inter_400Regular', fontSize: 13, lineHeight: 18 },
+  inputWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
   },
-  appSub: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 13,
-    color: "#8B949E",
-    letterSpacing: 0.3,
-  },
-
-  card: {
-    backgroundColor: "#161B22",
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    paddingHorizontal: 24,
-    paddingTop: 20,
-    gap: 16,
-    borderTopWidth: 1,
-    borderTopColor: "#30363D",
-  },
-  divider: {
-    width: 36,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: "#30363D",
-    alignSelf: "center",
-    marginBottom: 4,
-  },
-  cardTitle: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 20,
-    color: "#E6EDF3",
-    letterSpacing: -0.3,
-  },
-  features: { gap: 10 },
-  featureRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  featureIcon: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    backgroundColor: "#1565C018",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  featureText: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 14,
-    color: "#8B949E",
-  },
-
-  googleBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 12,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 14,
-    paddingVertical: 15,
-    minHeight: 54,
+  input: { flex: 1, fontFamily: 'Inter_400Regular', fontSize: 15 },
+  errorText: { color: '#C62828', fontFamily: 'Inter_400Regular', fontSize: 12 },
+  loginBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 14,
+    borderRadius: 12,
     marginTop: 4,
   },
-  gIconBox: {
-    width: 24,
-    height: 24,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  gIconText: {
-    fontSize: 18,
-    fontFamily: "Inter_700Bold",
-    color: "#4285F4",
-  },
-  googleBtnText: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 16,
-    color: "#1a1a1a",
-  },
-
-  disclaimer: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 11,
-    color: "#8B949E",
-    textAlign: "center",
-    lineHeight: 16,
-  },
+  loginBtnText: { fontFamily: 'Inter_600SemiBold', fontSize: 16, color: '#FFFFFF' },
+  features: { gap: 10 },
+  featureRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  featureIcon: { width: 32, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+  featureText: { fontFamily: 'Inter_400Regular', fontSize: 13, flex: 1 },
 });

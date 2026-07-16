@@ -1,17 +1,13 @@
 kind = "mobile"
 previewPath = "/"
-title = "Project PRF"
+title = "Project P.R.F"
 version = "1.0.0"
 id = "artifacts/prf-app"
 router = "expo-domain"
 
-[[integratedSkills]]
-name = "expo"
-version = "1.0.0"
-
 [[services]]
-ensurePreviewReachable = "/status"
 name = "expo"
+ensurePreviewReachable = "/status"
 paths = [ "/" ]
 localPort = 18849
 
