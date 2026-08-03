@@ -133,7 +133,7 @@ export default function EstudosScreen() {
                 </View>
                 <View style={[styles.divider, { backgroundColor: colors.border }]} />
                 <View style={styles.summaryItem}>
-                  <Text style={[styles.summaryNum, { color: "#3FB950" }]}>
+                  <Text style={[styles.summaryNum, { color: colors.success }]}>
                     {Math.round(totalProgress.pct * 100)}%
                   </Text>
                   <Text style={[styles.summaryLabel, { color: colors.mutedForeground }]}>

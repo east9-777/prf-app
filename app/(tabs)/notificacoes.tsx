@@ -77,7 +77,7 @@ export default function NotificacoesScreen() {
           {
             backgroundColor:
               item.type === "like"
-                ? "#F8514922"
+                ? colors.destructive + "22"
                 : item.type === "comment" || item.type === "reply"
                 ? colors.primary + "22"
                 : colors.muted,
@@ -89,7 +89,7 @@ export default function NotificacoesScreen() {
           size={18}
           color={
             item.type === "like"
-              ? "#F85149"
+              ? colors.destructive
               : item.type === "comment" || item.type === "reply"
               ? colors.primary
               : colors.mutedForeground

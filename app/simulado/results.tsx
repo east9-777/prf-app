@@ -36,7 +36,7 @@ export default function SimuladoResultsScreen() {
   const simulado = MOCK_SIMULADOS.find((s) => s.id === params.simuladoId);
 
   const gradeColor =
-    pct >= 70 ? "#3FB950" : pct >= 50 ? "#D29922" : "#F85149";
+    pct >= 70 ? colors.success : pct >= 50 ? colors.warning : colors.destructive;
   const gradeLabel =
     pct >= 70 ? "Aprovado!" : pct >= 50 ? "Regular" : "Precisa melhorar";
   const gradeIcon: keyof typeof Feather.glyphMap =
@@ -79,8 +79,8 @@ export default function SimuladoResultsScreen() {
 
         <View style={styles.statsRow}>
           {[
-            { icon: "check-circle" as const, label: "Acertos", value: String(score), color: "#3FB950" },
-            { icon: "x-circle" as const, label: "Erros", value: String(total - score), color: "#F85149" },
+            { icon: "check-circle" as const, label: "Acertos", value: String(score), color: colors.success },
+            { icon: "x-circle" as const, label: "Erros", value: String(total - score), color: colors.destructive },
             { icon: "clock" as const, label: "Tempo", value: formatTime(timeSpent), color: colors.primary },
           ].map((stat) => (
             <View
@@ -119,11 +119,11 @@ export default function SimuladoResultsScreen() {
                     {
                       backgroundColor: colors.card,
                       borderColor: isCorrect
-                        ? "#3FB95040"
+                        ? colors.success + "40"
                         : isUnanswered
                         ? colors.border
-                        : "#F8514940",
-                      borderLeftColor: isCorrect ? "#3FB950" : isUnanswered ? colors.border : "#F85149",
+                        : colors.destructive + "40",
+                      borderLeftColor: isCorrect ? colors.success : isUnanswered ? colors.border : colors.destructive,
                     },
                   ]}
                 >
@@ -133,10 +133,10 @@ export default function SimuladoResultsScreen() {
                         styles.reviewBadge,
                         {
                           backgroundColor: isCorrect
-                            ? "#3FB95022"
+                            ? colors.success + "22"
                             : isUnanswered
                             ? colors.muted
-                            : "#F8514922",
+                            : colors.destructive + "22",
                         },
                       ]}
                     >
@@ -152,10 +152,10 @@ export default function SimuladoResultsScreen() {
                           styles.reviewBadgeText,
                           {
                             color: isCorrect
-                              ? "#3FB950"
+                              ? colors.success
                               : isUnanswered
                               ? colors.mutedForeground
-                              : "#F85149",
+                              : colors.destructive,
                           },
                         ]}
                       >
@@ -170,7 +170,7 @@ export default function SimuladoResultsScreen() {
                     {q.text}
                   </Text>
                   {!isCorrect && !isUnanswered && (
-                    <Text style={[styles.reviewCorrect, { color: "#3FB950" }]}>
+                    <Text style={[styles.reviewCorrect, { color: colors.success }]}>
                       Correta: {q.options[q.correctIndex]}
                     </Text>
                   )}
@@ -185,8 +185,8 @@ export default function SimuladoResultsScreen() {
             style={[styles.btn, { backgroundColor: colors.primary }]}
             onPress={() => router.replace(`/simulado/${params.simuladoId}` as any)}
           >
-            <Feather name="refresh-cw" size={16} color="#FFFFFF" />
-            <Text style={styles.btnText}>Refazer simulado</Text>
+            <Feather name="refresh-cw" size={16} color={colors.primaryForeground} />
+            <Text style={[styles.btnText, { color: colors.primaryForeground }]}>Refazer simulado</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.btnSecondary, { borderColor: colors.border }]}
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 12,
   },
-  btnText: { fontFamily: "Inter_600SemiBold", fontSize: 15, color: "#FFFFFF" },
+  btnText: { fontFamily: "Inter_600SemiBold", fontSize: 15 },
   btnSecondary: {
     alignItems: "center",
     justifyContent: "center",

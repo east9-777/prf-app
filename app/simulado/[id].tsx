@@ -145,16 +145,16 @@ export default function SimuladoScreen() {
           headerShadowVisible: false,
           headerBackTitle: "Sair",
           headerRight: () => (
-            <View style={[styles.timer, { backgroundColor: isLow ? "#F8514922" : colors.card }]}>
+            <View style={[styles.timer, { backgroundColor: isLow ? colors.destructive + "22" : colors.card }]}>
               <Feather
                 name="clock"
                 size={13}
-                color={isLow ? "#F85149" : colors.mutedForeground}
+                color={isLow ? colors.destructive : colors.mutedForeground}
               />
               <Text
                 style={[
                   styles.timerText,
-                  { color: isLow ? "#F85149" : colors.mutedForeground },
+                  { color: isLow ? colors.destructive : colors.mutedForeground },
                 ]}
               >
                 {formatTime(timeLeft)}
@@ -218,7 +218,7 @@ export default function SimuladoScreen() {
                     style={[
                       styles.letterText,
                       {
-                        color: isSelected ? "#FFFFFF" : colors.mutedForeground,
+                        color: isSelected ? colors.primaryForeground : colors.mutedForeground,
                       },
                     ]}
                   >
@@ -267,15 +267,15 @@ export default function SimuladoScreen() {
             onPress={() => setCurrentQ((q) => Math.min(simulado.questions.length - 1, q + 1))}
           >
             <Text style={styles.navTextPrimary}>Próxima</Text>
-            <Feather name="chevron-right" size={20} color="#FFFFFF" />
+            <Feather name="chevron-right" size={20} color={colors.primaryForeground} />
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
-            style={[styles.navBtnPrimary, { backgroundColor: "#3FB950" }]}
+            style={[styles.navBtnPrimary, { backgroundColor: colors.success }]}
             onPress={() => handleFinish(false)}
           >
             <Text style={styles.navTextPrimary}>Finalizar</Text>
-            <Feather name="check" size={20} color="#FFFFFF" />
+            <Feather name="check" size={20} color={colors.primaryForeground} />
           </TouchableOpacity>
         )}
       </View>
@@ -356,7 +356,7 @@ const styles = StyleSheet.create({
   navTextPrimary: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 15,
-    color: "#FFFFFF",
+    color: "#FFFFFF", // overridden inline where needed
   },
   timer: {
     flexDirection: "row",

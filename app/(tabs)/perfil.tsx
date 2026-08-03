@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 2,
-    borderColor: "#0D1117",
+    borderColor: "transparent",
   },
   editBtn: {
     flexDirection: "row",

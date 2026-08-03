@@ -126,13 +126,13 @@ export function PostCard({ post, onLike, onSave, showMenu, onMenu }: PostCardPro
           <Feather
             name={isLiked ? "heart" : "heart"}
             size={17}
-            color={isLiked ? "#F85149" : colors.mutedForeground}
+            color={isLiked ? colors.destructive : colors.mutedForeground}
             style={isLiked ? { opacity: 1 } : undefined}
           />
           <Text
             style={[
               styles.actionText,
-              { color: isLiked ? "#F85149" : colors.mutedForeground },
+              { color: isLiked ? colors.destructive : colors.mutedForeground },
             ]}
           >
             {post.likes}

@@ -94,7 +94,7 @@ export default function SimuladosScreen() {
                 styles.resultBadge,
                 {
                   backgroundColor:
-                    pct >= 70 ? "#3FB95022" : pct >= 50 ? "#D2992222" : "#F8514922",
+                    pct >= 70 ? colors.success + "22" : pct >= 50 ? colors.warning + "22" : colors.destructive + "22",
                 },
               ]}
             >
@@ -103,7 +103,7 @@ export default function SimuladosScreen() {
                   styles.resultText,
                   {
                     color:
-                      pct >= 70 ? "#3FB950" : pct >= 50 ? "#D29922" : "#F85149",
+                      pct >= 70 ? colors.success : pct >= 50 ? colors.warning : colors.destructive,
                   },
                 ]}
               >
@@ -150,7 +150,7 @@ export default function SimuladosScreen() {
                   { backgroundColor: colors.card, borderColor: colors.border },
                 ]}
               >
-                <Text style={[styles.statNum, { color: "#3FB950" }]}>
+                <Text style={[styles.statNum, { color: colors.success }]}>
                   {stats.completed}
                 </Text>
                 <Text style={[styles.statLabel, { color: colors.mutedForeground }]}>
@@ -169,11 +169,11 @@ export default function SimuladosScreen() {
                     {
                       color:
                         stats.avg >= 70
-                          ? "#3FB950"
+                          ? colors.success
                           : stats.avg >= 50
-                          ? "#D29922"
+                          ? colors.warning
                           : stats.completed > 0
-                          ? "#F85149"
+                          ? colors.destructive
                           : colors.mutedForeground,
                     },
                   ]}

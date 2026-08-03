@@ -58,9 +58,9 @@ export default function ConteudoScreen() {
             </Text>
           </View>
           {item.topics.some((t) => t.incidencia === "alta") && (
-            <View style={[styles.badge, { backgroundColor: "#EF444422" }]}>
-              <Feather name="trending-up" size={11} color="#EF4444" />
-              <Text style={[styles.badgeText, { color: "#EF4444" }]}>
+            <View style={[styles.badge, { backgroundColor: colors.destructive + "22" }]}>
+              <Feather name="trending-up" size={11} color={colors.destructive} />
+              <Text style={[styles.badgeText, { color: colors.destructive }]}>
                 Alta incidência
               </Text>
             </View>

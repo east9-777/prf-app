@@ -5,6 +5,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  useColorScheme,
   View,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
@@ -20,27 +21,33 @@ import {
   type TopicItem,
 } from '@/lib/conteudoData';
 
-/* ── Color tokens type ────────────────────────────────────────────────── */
 type Colors = ReturnType<typeof useColors>;
 
-/* ── Highlight configs ────────────────────────────────────────────────── */
-const HIGHLIGHT_CONFIG: Record<
-  string,
-  { label: string; bg: string; border: string; icon: string; text: string }
-> = {
-  atencao:      { label: '⚠️ Atenção',        bg: '#FFF9C4', border: '#F9A825', icon: 'alert-circle',  text: '#795548' },
-  pegadinha:    { label: '🪤 Pegadinha',       bg: '#FDECEA', border: '#E53935', icon: 'alert-triangle', text: '#B71C1C' },
-  muito_cobrado:{ label: '🔥 Muito Cobrado',   bg: '#FFF3E0', border: '#FB8C00', icon: 'trending-up',   text: '#E65100' },
-  memorize:     { label: '💡 Memorize',        bg: '#E8F5E9', border: '#43A047', icon: 'zap',           text: '#1B5E20' },
-  dica_banca:   { label: '🎯 Dica da Banca',   bg: '#E8EAF6', border: '#3949AB', icon: 'target',        text: '#1A237E' },
+/* ── Highlight configs (light & dark) ────────────────────────────────── */
+const HIGHLIGHT_LIGHT: Record<string, { label: string; bg: string; border: string; text: string }> = {
+  atencao:       { label: '⚠️ Atenção',       bg: '#FFF9C4', border: '#F9A825', text: '#795548' },
+  pegadinha:     { label: '🪤 Pegadinha',      bg: '#FDECEA', border: '#E53935', text: '#B71C1C' },
+  muito_cobrado: { label: '🔥 Muito Cobrado',  bg: '#FFF3E0', border: '#FB8C00', text: '#E65100' },
+  memorize:      { label: '💡 Memorize',       bg: '#E8F5E9', border: '#43A047', text: '#1B5E20' },
+  dica_banca:    { label: '🎯 Dica da Banca',  bg: '#E8EAF6', border: '#3949AB', text: '#1A237E' },
+};
+
+const HIGHLIGHT_DARK: Record<string, { label: string; bg: string; border: string; text: string }> = {
+  atencao:       { label: '⚠️ Atenção',       bg: '#422006', border: '#F9A825', text: '#FCD34D' },
+  pegadinha:     { label: '🪤 Pegadinha',      bg: '#450A0A', border: '#E53935', text: '#FCA5A5' },
+  muito_cobrado: { label: '🔥 Muito Cobrado',  bg: '#431407', border: '#FB8C00', text: '#FDBA74' },
+  memorize:      { label: '💡 Memorize',       bg: '#022C22', border: '#43A047', text: '#6EE7B7' },
+  dica_banca:    { label: '🎯 Dica da Banca',  bg: '#1E1B4B', border: '#3949AB', text: '#A5B4FC' },
 };
 
 /* ── Sub-components ───────────────────────────────────────────────────── */
 function HighlightCard({ box }: { box: HighlightBox }) {
-  const cfg = HIGHLIGHT_CONFIG[box.type] ?? HIGHLIGHT_CONFIG.atencao;
+  const scheme = useColorScheme();
+  const CONFIG = scheme === 'dark' ? HIGHLIGHT_DARK : HIGHLIGHT_LIGHT;
+  const cfg = CONFIG[box.type] ?? (scheme === 'dark' ? HIGHLIGHT_DARK.atencao : HIGHLIGHT_LIGHT.atencao);
   return (
     <View style={[styles.highlightCard, { backgroundColor: cfg.bg, borderColor: cfg.border }]}>
-      <Text style={[styles.highlightLabel, { color: cfg.text }]}>{cfg.label}</Text>
+      <Text style={[styles.highlightLabel, { color: cfg.border }]}>{cfg.label}</Text>
       <Text style={[styles.highlightText, { color: cfg.text }]}>{box.text}</Text>
     </View>
   );
@@ -52,19 +59,19 @@ function ExemploCard({ ex, colors }: { ex: ExemploItem; colors: Colors }) {
       {ex.title && <Text style={[styles.exemploTitle, { color: colors.text }]}>{ex.title}</Text>}
       {ex.correct && (
         <View style={styles.exemploRow}>
-          <Feather name="check-circle" size={14} color="#22C55E" />
-          <Text style={[styles.exemploCorrect]}>{ex.correct}</Text>
+          <Feather name="check-circle" size={14} color={colors.success} />
+          <Text style={[styles.exemploText, { color: colors.success, flex: 1, lineHeight: 19 }]}>{ex.correct}</Text>
         </View>
       )}
       {ex.incorrect && (
         <View style={styles.exemploRow}>
-          <Feather name="x-circle" size={14} color="#EF4444" />
-          <Text style={[styles.exemploIncorrect]}>{ex.incorrect}</Text>
+          <Feather name="x-circle" size={14} color={colors.destructive} />
+          <Text style={[styles.exemploText, { color: colors.destructive, flex: 1, lineHeight: 19 }]}>{ex.incorrect}</Text>
         </View>
       )}
       <View style={[styles.exemploExplanRow, { borderTopColor: colors.border }]}>
-        <Feather name="info" size={13} color="#5C6BC0" style={{ marginTop: 1 }} />
-        <Text style={styles.exemploExplan}>{ex.explanation}</Text>
+        <Feather name="info" size={13} color={colors.primary} style={{ marginTop: 1 }} />
+        <Text style={[styles.exemploText, { color: colors.mutedForeground, flex: 1, lineHeight: 18, fontSize: 12 }]}>{ex.explanation}</Text>
       </View>
     </View>
   );
@@ -76,7 +83,6 @@ function TableCard({ table, colors }: { table: TableData; colors: Colors }) {
       <Text style={[styles.tableTitle, { color: colors.text }]}>{table.title}</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <View>
-          {/* Header */}
           <View style={[styles.tableRow, { backgroundColor: colors.primary + '18' }]}>
             {table.headers.map((h) => (
               <View key={h} style={[styles.tableCell, { borderColor: colors.border }]}>
@@ -84,7 +90,6 @@ function TableCard({ table, colors }: { table: TableData; colors: Colors }) {
               </View>
             ))}
           </View>
-          {/* Rows */}
           {table.rows.map((row, ri) => (
             <View
               key={ri}
@@ -125,8 +130,8 @@ function ExercicioCard({ ex, index, colors }: { ex: Exercicio; index: number; co
           let bg = colors.background;
           let border = colors.border;
           let textColor = colors.text;
-          if (answered && isCorrect) { bg = '#22C55E18'; border = '#22C55E66'; textColor = '#22C55E'; }
-          if (answered && isSelected && !isCorrect) { bg = '#EF444418'; border = '#EF444466'; textColor = '#EF4444'; }
+          if (answered && isCorrect) { bg = colors.success + '18'; border = colors.success + '66'; textColor = colors.success; }
+          if (answered && isSelected && !isCorrect) { bg = colors.destructive + '18'; border = colors.destructive + '66'; textColor = colors.destructive; }
           return (
             <Pressable
               key={i}
@@ -135,9 +140,9 @@ function ExercicioCard({ ex, index, colors }: { ex: Exercicio; index: number; co
             >
               <View style={[styles.optionLetterBox, {
                 backgroundColor: answered && isCorrect
-                  ? '#22C55E33'
+                  ? colors.success + '33'
                   : answered && isSelected && !isCorrect
-                  ? '#EF444433'
+                  ? colors.destructive + '33'
                   : colors.muted,
               }]}>
                 <Text style={[styles.optionLetter, { color: textColor }]}>
@@ -145,8 +150,8 @@ function ExercicioCard({ ex, index, colors }: { ex: Exercicio; index: number; co
                 </Text>
               </View>
               <Text style={[styles.optionLabel, { color: textColor, flex: 1 }]}>{opt}</Text>
-              {answered && isCorrect && <Feather name="check-circle" size={14} color="#22C55E" />}
-              {answered && isSelected && !isCorrect && <Feather name="x-circle" size={14} color="#EF4444" />}
+              {answered && isCorrect && <Feather name="check-circle" size={14} color={colors.success} />}
+              {answered && isSelected && !isCorrect && <Feather name="x-circle" size={14} color={colors.destructive} />}
             </Pressable>
           );
         })}
@@ -179,7 +184,11 @@ function TopicSection({
 }) {
   const [expanded, setExpanded] = useState(false);
   const incidenciaColor =
-    topic.incidencia === 'alta' ? '#EF4444' : topic.incidencia === 'média' ? '#F59E0B' : '#6B7280';
+    topic.incidencia === 'alta'
+      ? colors.destructive
+      : topic.incidencia === 'média'
+      ? colors.warning
+      : colors.mutedForeground;
   const incidenciaLabel =
     topic.incidencia === 'alta' ? '🔥 Alta' : topic.incidencia === 'média' ? '⚡ Média' : 'Baixa';
 
@@ -197,7 +206,7 @@ function TopicSection({
       >
         <View style={{ flex: 1, gap: 4 }}>
           <Text style={[styles.topicTitle, { color: colors.text }]}>{topic.title}</Text>
-          <View style={[styles.incidenciaBadge, { backgroundColor: incidenciaColor + '18' }]}>
+          <View style={[styles.incidenciaBadge, { backgroundColor: incidenciaColor + '20' }]}>
             <Text style={[styles.incidenciaText, { color: incidenciaColor }]}>
               Incidência: {incidenciaLabel}
             </Text>
@@ -212,10 +221,8 @@ function TopicSection({
 
       {expanded && (
         <View style={[styles.topicBody, { backgroundColor: colors.background }]}>
-          {/* Content */}
           <Text style={[styles.topicContent, { color: colors.text }]}>{topic.content}</Text>
 
-          {/* Key Points */}
           {topic.keyPoints && topic.keyPoints.length > 0 && (
             <View style={styles.keyPointsWrap}>
               <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>
@@ -230,13 +237,9 @@ function TopicSection({
             </View>
           )}
 
-          {/* Highlights */}
           {topic.highlights?.map((box, i) => <HighlightCard key={i} box={box} />)}
-
-          {/* Tables */}
           {topic.tables?.map((t, i) => <TableCard key={i} table={t} colors={colors} />)}
 
-          {/* Examples */}
           {topic.examples && topic.examples.length > 0 && (
             <View>
               <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>EXEMPLOS</Text>
@@ -246,7 +249,6 @@ function TopicSection({
             </View>
           )}
 
-          {/* Exercises */}
           {topic.exercises && topic.exercises.length > 0 && (
             <View>
               <View style={[styles.exerciseLabelRow, { backgroundColor: colors.primary + '10', borderColor: colors.primary + '25' }]}>
@@ -327,8 +329,8 @@ export default function AulaDetailScreen() {
         </View>
 
         {/* Content disclaimer */}
-        <View style={[styles.disclaimerBox, { backgroundColor: '#F59E0B18', borderColor: '#F59E0B44' }]}>
-          <Feather name="alert-circle" size={14} color="#F59E0B" />
+        <View style={[styles.disclaimerBox, { backgroundColor: colors.warning + '18', borderColor: colors.warning + '44' }]}>
+          <Feather name="alert-circle" size={14} color={colors.warning} />
           <Text style={[styles.disclaimerText, { color: colors.text }]}>
             <Text style={{ fontFamily: 'Inter_600SemiBold' }}>Conteúdo de referência: </Text>
             este material cobre os principais pontos do edital, mas não é exaustivo. Complemente com o edital oficial, legislação e outras fontes.
@@ -353,7 +355,6 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   scroll: { padding: 16, gap: 12 },
 
-  // Banner
   subjectBanner: {
     flexDirection: 'row',
     gap: 14,
@@ -368,7 +369,6 @@ const styles = StyleSheet.create({
   bannerDesc: { fontFamily: 'Inter_400Regular', fontSize: 12, lineHeight: 17 },
   bannerTopicCount: { fontFamily: 'Inter_500Medium', fontSize: 11 },
 
-  // Disclaimer
   disclaimerBox: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -385,7 +385,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  // Topic section
   topicSection: { borderRadius: 12, overflow: 'hidden', marginBottom: 2 },
   topicHeader: {
     flexDirection: 'row',
@@ -404,7 +403,6 @@ const styles = StyleSheet.create({
   },
   incidenciaText: { fontFamily: 'Inter_500Medium', fontSize: 10 },
 
-  // Topic body
   topicBody: { paddingHorizontal: 4, gap: 14, paddingBottom: 8, marginTop: 8 },
   topicContent: {
     fontFamily: 'Inter_400Regular',
@@ -412,7 +410,6 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
 
-  // Section labels
   sectionLabel: {
     fontFamily: 'Inter_600SemiBold',
     fontSize: 10,
@@ -421,7 +418,6 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
 
-  // Exercise label row
   exerciseLabelRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -433,13 +429,11 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
 
-  // Key points
   keyPointsWrap: { gap: 6 },
   keyPointRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   dot: { width: 6, height: 6, borderRadius: 3, marginTop: 7 },
   keyPointText: { fontFamily: 'Inter_400Regular', fontSize: 13, flex: 1, lineHeight: 20 },
 
-  // Highlight
   highlightCard: {
     padding: 13,
     borderRadius: 10,
@@ -449,7 +443,6 @@ const styles = StyleSheet.create({
   highlightLabel: { fontFamily: 'Inter_700Bold', fontSize: 12 },
   highlightText: { fontFamily: 'Inter_400Regular', fontSize: 13, lineHeight: 19 },
 
-  // Example
   exemploCard: {
     borderRadius: 10,
     borderWidth: 1,
@@ -459,8 +452,7 @@ const styles = StyleSheet.create({
   },
   exemploTitle: { fontFamily: 'Inter_600SemiBold', fontSize: 13 },
   exemploRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
-  exemploCorrect: { fontFamily: 'Inter_400Regular', fontSize: 13, color: '#22C55E', flex: 1, lineHeight: 19 },
-  exemploIncorrect: { fontFamily: 'Inter_400Regular', fontSize: 13, color: '#EF4444', flex: 1, lineHeight: 19 },
+  exemploText: { fontFamily: 'Inter_400Regular', fontSize: 13 },
   exemploExplanRow: {
     flexDirection: 'row',
     gap: 8,
@@ -468,9 +460,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     alignItems: 'flex-start',
   },
-  exemploExplan: { fontFamily: 'Inter_400Regular', fontSize: 12, color: '#5C6BC0', flex: 1, lineHeight: 18 },
 
-  // Table
   tableWrap: { gap: 8 },
   tableTitle: { fontFamily: 'Inter_600SemiBold', fontSize: 12, marginBottom: 4 },
   tableRow: { flexDirection: 'row' },
@@ -478,7 +468,6 @@ const styles = StyleSheet.create({
   tableHeader: { fontFamily: 'Inter_600SemiBold', fontSize: 11 },
   tableCellText: { fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 15 },
 
-  // Exercise
   exercicioCard: {
     borderRadius: 12,
     padding: 14,

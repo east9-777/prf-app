@@ -54,9 +54,9 @@ export default function AulasScreen() {
               </Text>
             </View>
             {altaCount > 0 && (
-              <View style={[styles.badge, { backgroundColor: '#EF444422' }]}>
-                <Feather name="trending-up" size={11} color="#EF4444" />
-                <Text style={[styles.badgeText, { color: '#EF4444' }]}>
+              <View style={[styles.badge, { backgroundColor: colors.destructive + '22' }]}>
+                <Feather name="trending-up" size={11} color={colors.destructive} />
+                <Text style={[styles.badgeText, { color: colors.destructive }]}>
                   {altaCount} alta incidência
                 </Text>
               </View>
@@ -81,8 +81,8 @@ export default function AulasScreen() {
             <Text style={[styles.screenSubtitle, { color: colors.mutedForeground }]}>
               Teoria com exemplos, tabelas e exercícios comentados
             </Text>
-            <View style={[styles.disclaimer, { backgroundColor: '#F59E0B14', borderColor: '#F59E0B40' }]}>
-              <Feather name="info" size={13} color="#F59E0B" />
+            <View style={[styles.disclaimer, { backgroundColor: colors.warning + '14', borderColor: colors.warning + '40' }]}>
+              <Feather name="info" size={13} color={colors.warning} />
               <Text style={[styles.disclaimerText, { color: colors.mutedForeground }]}>
                 Conteúdo de referência — não exaustivo. Complemente com o edital oficial e outras fontes.
               </Text>
