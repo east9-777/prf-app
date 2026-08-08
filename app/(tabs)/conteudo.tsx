@@ -12,6 +12,8 @@ import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { Pill } from "@/components/ui/Pill";
+import { SectionLabel } from "@/components/ui/SectionLabel";
 import { CONTEUDO_SUBJECTS, type ConteudoSubject } from "@/lib/conteudoData";
 
 export default function ConteudoScreen() {
@@ -51,19 +53,9 @@ export default function ConteudoScreen() {
           {item.description}
         </Text>
         <View style={styles.badgeRow}>
-          <View style={[styles.badge, { backgroundColor: colors.muted }]}>
-            <Feather name="list" size={11} color={colors.mutedForeground} />
-            <Text style={[styles.badgeText, { color: colors.mutedForeground }]}>
-              {item.topics.length} tópicos
-            </Text>
-          </View>
+          <Pill label={`${item.topics.length} tópicos`} icon="list" />
           {item.topics.some((t) => t.incidencia === "alta") && (
-            <View style={[styles.badge, { backgroundColor: colors.destructive + "22" }]}>
-              <Feather name="trending-up" size={11} color={colors.destructive} />
-              <Text style={[styles.badgeText, { color: colors.destructive }]}>
-                Alta incidência
-              </Text>
-            </View>
+            <Pill label="Alta incidência" tone="destructive" icon="trending-up" />
           )}
         </View>
       </View>
@@ -102,11 +94,9 @@ export default function ConteudoScreen() {
                 </Pressable>
               )}
             </View>
-            <Text
-              style={[styles.sectionLabel, { color: colors.mutedForeground }]}
-            >
-              {filtered.length} MATÉRIAS
-            </Text>
+            <SectionLabel style={styles.sectionLabel}>
+              {filtered.length} matérias
+            </SectionLabel>
           </View>
         }
         ListEmptyComponent={
@@ -150,9 +140,6 @@ const styles = StyleSheet.create({
     padding: 0,
   },
   sectionLabel: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 11,
-    letterSpacing: 1,
     marginLeft: 4,
   },
   card: {
@@ -183,18 +170,6 @@ const styles = StyleSheet.create({
     lineHeight: 17,
   },
   badgeRow: { flexDirection: "row", gap: 6, marginTop: 2 },
-  badge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 20,
-  },
-  badgeText: {
-    fontFamily: "Inter_500Medium",
-    fontSize: 10,
-  },
   empty: {
     alignItems: "center",
     gap: 12,

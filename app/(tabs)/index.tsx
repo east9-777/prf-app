@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   Platform,
   ScrollView,
@@ -8,16 +8,42 @@ import {
   View,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "@/context/AuthContext";
 import { useColors } from "@/hooks/useColors";
+import { HighlightCard } from "@/components/ui/HighlightCard";
+import { SectionLabel } from "@/components/ui/SectionLabel";
+import { MOCK_SUBJECTS } from "@/lib/mockData";
+import { getData, STORAGE_KEYS } from "@/lib/storage";
+import type { Subject } from "@/lib/types";
+
+type ProgressMap = Record<string, boolean>;
 
 export default function InicioScreen() {
   const colors = useColors();
   const { user } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const [progress, setProgress] = useState<ProgressMap>({});
+
+  useFocusEffect(
+    useCallback(() => {
+      getData<ProgressMap>(STORAGE_KEYS.STUDY_PROGRESS).then((p) => {
+        if (p) setProgress(p);
+      });
+    }, [])
+  );
+
+  const totalProgress = useMemo(() => {
+    let done = 0;
+    let total = 0;
+    MOCK_SUBJECTS.forEach((s: Subject) => {
+      total += s.topics.length;
+      done += s.topics.filter((t) => !!progress[t.id]).length;
+    });
+    return { done, total, pct: total > 0 ? done / total : 0 };
+  }, [progress]);
 
   const cards = [
     {
@@ -25,35 +51,30 @@ export default function InicioScreen() {
       title: "Estudos",
       desc: "Acesse os conteúdos e materiais de estudo",
       route: "/(tabs)/estudos",
-      color: "#3B82F6",
     },
     {
       icon: "layers" as const,
       title: "Conteúdo",
       desc: "Teoria completa das matérias do edital",
       route: "/(tabs)/conteudo",
-      color: "#6366F1",
     },
     {
       icon: "clipboard" as const,
       title: "Simulados",
       desc: "Teste seus conhecimentos com simulados",
       route: "/(tabs)/simulados",
-      color: "#10B981",
     },
     {
       icon: "calendar" as const,
       title: "Cronograma",
       desc: "Organize sua rotina de estudos",
       route: "/cronograma",
-      color: "#F59E0B",
     },
     {
       icon: "flag" as const,
       title: "Etapas do Concurso",
       desc: "Conheça todas as fases do concurso",
       route: "/etapas",
-      color: "#8B5CF6",
     },
   ];
 
@@ -66,22 +87,27 @@ export default function InicioScreen() {
           { paddingBottom: insets.bottom + (Platform.OS === "web" ? 34 : 0) + 24 },
         ]}
       >
-        <View style={[styles.welcome, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <Text style={[styles.greeting, { color: colors.mutedForeground }]}>
-            Olá, {user?.username ? `@${user.username}` : "candidato"} 👋
-          </Text>
-          <Text style={[styles.welcomeTitle, { color: colors.text }]}>
-            Bem-vindo ao{"\n"}
-            <Text style={{ color: colors.primary }}>Project P.R.F</Text>
-          </Text>
-          <Text style={[styles.welcomeDesc, { color: colors.mutedForeground }]}>
-            Seu preparatório completo para o concurso da Polícia Rodoviária Federal.
-          </Text>
-        </View>
-
-        <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>
-          ACESSO RÁPIDO
+        <Text style={[styles.greeting, { color: colors.mutedForeground }]}>
+          Olá, {user?.username ? `@${user.username}` : "candidato"} 👋
         </Text>
+        <Text style={[styles.welcomeTitle, { color: colors.text }]}>
+          Bem-vindo ao{" "}
+          <Text style={{ color: colors.primary }}>Project P.R.F</Text>
+        </Text>
+
+        <HighlightCard
+          eyebrow="Seu progresso"
+          title={
+            totalProgress.total > 0
+              ? `Você já concluiu ${totalProgress.done} de ${totalProgress.total} assuntos`
+              : "Comece agora seus estudos"
+          }
+          progress={totalProgress.pct}
+          progressLabel={`${Math.round(totalProgress.pct * 100)}% do edital concluído`}
+          onPress={() => router.push("/(tabs)/estudos" as any)}
+        />
+
+        <SectionLabel style={styles.sectionLabel}>Acesso rápido</SectionLabel>
 
         <View style={styles.grid}>
           {cards.map((card) => (
@@ -91,8 +117,8 @@ export default function InicioScreen() {
               onPress={() => router.push(card.route as any)}
               activeOpacity={0.8}
             >
-              <View style={[styles.iconWrap, { backgroundColor: card.color + "22" }]}>
-                <Feather name={card.icon} size={22} color={card.color} />
+              <View style={[styles.iconWrap, { backgroundColor: colors.primarySoft }]}>
+                <Feather name={card.icon} size={22} color={colors.primary} />
               </View>
               <Text style={[styles.cardTitle, { color: colors.text }]}>{card.title}</Text>
               <Text style={[styles.cardDesc, { color: colors.mutedForeground }]} numberOfLines={2}>
@@ -109,33 +135,20 @@ export default function InicioScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   scroll: { padding: 16, gap: 16 },
-  welcome: {
-    borderRadius: 16,
-    borderWidth: 1,
-    padding: 20,
-    gap: 6,
-  },
   greeting: {
     fontFamily: "Inter_400Regular",
     fontSize: 14,
+    marginLeft: 2,
   },
   welcomeTitle: {
     fontFamily: "Inter_700Bold",
     fontSize: 24,
     lineHeight: 32,
     letterSpacing: -0.5,
-  },
-  welcomeDesc: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 14,
-    lineHeight: 20,
-    marginTop: 4,
+    marginLeft: 2,
+    marginBottom: 4,
   },
   sectionLabel: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 11,
-    letterSpacing: 0.8,
-    textTransform: "uppercase",
     marginLeft: 4,
   },
   grid: {

@@ -45,7 +45,7 @@ function GoogleButton({
       disabled={loading}
     >
       {loading ? (
-        <ActivityIndicator color="#1565C0" size="small" />
+        <ActivityIndicator color="#2FBF71" size="small" />
       ) : (
         <>
           <View style={styles.gIconBox}>
@@ -142,7 +142,7 @@ export default function LoginScreen() {
           {FEATURES.map((f) => (
             <View key={f.text} style={styles.featureRow}>
               <View style={styles.featureIcon}>
-                <Feather name={f.icon} size={14} color="#1976D2" />
+                <Feather name={f.icon} size={14} color="#2FBF71" />
               </View>
               <Text style={styles.featureText}>{f.text}</Text>
             </View>
@@ -175,10 +175,10 @@ const styles = StyleSheet.create({
     borderRadius: 32,
     backgroundColor: "#161B22",
     borderWidth: 1,
-    borderColor: "#1565C040",
+    borderColor: "#2FBF7140",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#1565C0",
+    shadowColor: "#2FBF71",
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.25,
     shadowRadius: 24,
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 8,
-    backgroundColor: "#1565C018",
+    backgroundColor: "#2FBF7118",
     alignItems: "center",
     justifyContent: "center",
   },
