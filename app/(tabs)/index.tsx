@@ -72,10 +72,10 @@ export default function InicioScreen() {
           </Text>
           <Text style={[styles.welcomeTitle, { color: colors.text }]}>
             Bem-vindo ao{"\n"}
-            <Text style={{ color: colors.primary }}>Project P.R.F</Text>
+            <Text style={{ color: colors.primary }}>Aprovação PRF</Text>
           </Text>
           <Text style={[styles.welcomeDesc, { color: colors.mutedForeground }]}>
-            Seu preparatório completo para o concurso da Polícia Rodoviária Federal.
+            Sinta o orgulho do dia da sua posse! 👮‍♂️ Estude hoje para vencer amanhã! ⚡
           </Text>
         </View>
 

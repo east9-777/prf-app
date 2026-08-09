@@ -13,7 +13,7 @@ export default function Index() {
           style={styles.logo}
           resizeMode="contain"
         />
-        <Text style={styles.title}>Project P.R.F</Text>
+        <Text style={styles.title}>Aprovação PRF</Text>
         <ActivityIndicator size="large" color="#1565C0" style={styles.spinner} />
       </View>
     );

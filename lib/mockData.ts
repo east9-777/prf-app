@@ -920,7 +920,7 @@ export const MOCK_NOTIFICATIONS: Notification[] = [
   {
     id: "n3",
     type: "system",
-    title: "Bem-vindo ao Project P.R.F!",
+    title: "Bem-vindo ao Aprovação PRF!",
     body: "Complete seu cronograma de estudos e faça seu primeiro simulado hoje!",
     createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
     isRead: true,

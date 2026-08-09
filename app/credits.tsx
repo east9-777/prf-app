@@ -43,7 +43,7 @@ export default function CreditsScreen() {
             resizeMode="contain"
           />
           <Text style={[styles.appName, { color: colors.text }]}>
-            Project P.R.F
+            Aprovação PRF
           </Text>
           <Text style={[styles.version, { color: colors.mutedForeground }]}>
             Versão 1.0.0
@@ -98,7 +98,7 @@ export default function CreditsScreen() {
             SOBRE O PROJETO
           </Text>
           <Text style={[styles.description, { color: colors.foreground }]}>
-            "Projeto desenvolvido para auxiliar candidatos da Polícia Rodoviária Federal em sua preparação para o concurso."
+            Projeto desenvolvido para auxiliar candidatos da Polícia Rodoviária Federal em sua preparação para o concurso.
           </Text>
         </View>
 
@@ -119,7 +119,7 @@ export default function CreditsScreen() {
         </View>
 
         <Text style={[styles.copyright, { color: colors.mutedForeground }]}>
-          © 2025 Project P.R.F{"\n"}Todos os direitos reservados
+          © 2025 Aprovação PRF{"\n"}Todos os direitos reservados
         </Text>
       </ScrollView>
     </View>

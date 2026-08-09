@@ -3,7 +3,6 @@ import {
   ActivityIndicator,
   Alert,
   Image,
-  Platform,
   Pressable,
   StatusBar,
   StyleSheet,
@@ -11,6 +10,7 @@ import {
   View,
 } from "react-native";
 import * as WebBrowser from "expo-web-browser";
+import { useIdTokenAuthRequest } from "expo-auth-session/providers/google";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -64,6 +64,14 @@ export default function LoginScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [googleRequest, , promptGoogleAsync] = useIdTokenAuthRequest(
+    {
+      webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+      androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
+      selectAccount: true,
+    },
+    { scheme: "project-prf" }
+  );
 
   useEffect(() => {
     if (user) {
@@ -80,23 +88,18 @@ export default function LoginScreen() {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       setLoading(true);
 
-      if (Platform.OS === "web") {
-        await signInWithGoogle();
-      } else {
-        const { GoogleSignin } = await import(
-          "@react-native-google-signin/google-signin"
-        );
-        GoogleSignin.configure({
-          webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
-          androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
-          offlineAccess: false,
-          scopes: ["email", "profile"],
-        });
-        await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-        const response = await GoogleSignin.signIn();
-        const idToken = response.data?.idToken ?? (response as any).idToken;
+      if (!googleRequest) {
+        throw new Error("O login do Google ainda está carregando. Tente novamente.");
+      }
+
+      const result = await promptGoogleAsync();
+      if (result.type === "success") {
+        const idToken =
+          result.params.id_token ?? result.authentication?.idToken;
         if (!idToken) throw new Error("ID token não recebido.");
         await signInWithGoogle(idToken);
+      } else if (result.type !== "cancel") {
+        throw new Error("Não foi possível concluir o login com o Google.");
       }
     } catch (err: any) {
       if (err?.code !== "SIGN_IN_CANCELLED" && err?.code !== -5) {
@@ -124,7 +127,7 @@ export default function LoginScreen() {
             resizeMode="contain"
           />
         </View>
-        <Text style={styles.appName}>Project P.R.F</Text>
+        <Text style={styles.appName}>Aprovação PRF</Text>
         <Text style={styles.appSub}>Polícia Rodoviária Federal</Text>
       </View>
 
@@ -153,7 +156,7 @@ export default function LoginScreen() {
 
         <Text style={styles.disclaimer}>
           Ao entrar, você concorda com os termos de uso e política de
-          privacidade do Project P.R.F
+          privacidade do Aprovação PRF
         </Text>
       </View>
     </View>

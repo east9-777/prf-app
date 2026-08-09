@@ -92,7 +92,7 @@ export default function PerfilScreen() {
         <View style={[styles.aboutCard, { backgroundColor: colors.primary + '10', borderColor: colors.primary + '30' }]}>
           <Feather name="shield" size={18} color={colors.primary} />
           <View style={{ flex: 1, gap: 4 }}>
-            <Text style={[styles.aboutTitle, { color: colors.primary }]}>Project P.R.F</Text>
+            <Text style={[styles.aboutTitle, { color: colors.primary }]}>Aprovação PRF</Text>
             <Text style={[styles.aboutText, { color: colors.primary }]}>
               App de preparação para o concurso da Polícia Rodoviária Federal. Conteúdo baseado no edital com exemplos, exercícios comentados e simulados estilo CEBRASPE.
             </Text>

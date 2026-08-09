@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Project P.R.F",
+    "name": "Aprovação PRF",
     "slug": "project-prf",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -44,7 +44,6 @@
       "expo-router",
       "expo-font",
       "expo-web-browser",
-      "@react-native-google-signin/google-signin",
       [
         "expo-notifications",
         {

@@ -256,7 +256,7 @@ export default function SettingsScreen() {
         </TouchableOpacity>
 
         <Text style={[styles.footer, { color: colors.mutedForeground }]}>
-          Project P.R.F v1.0.0{"\n"}Desenvolvido por Leivison
+          Aprovação PRF v1.0.0{"\n"}Desenvolvido por Leivison
         </Text>
       </ScrollView>
     </View>

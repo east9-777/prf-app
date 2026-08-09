@@ -47,7 +47,7 @@ export function PostCard({ post, onLike, onSave, showMenu, onMenu }: PostCardPro
   const handleShare = async () => {
     try {
       await Share.share({
-        message: `${post.title}\n\nProject P.R.F – Preparatório para o concurso da PRF`,
+        message: `${post.title}\n\nAprovação PRF – Preparatório para o concurso da PRF`,
       });
     } catch {}
   };
