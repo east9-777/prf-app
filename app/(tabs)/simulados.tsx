@@ -11,9 +11,6 @@ import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
-import { StatSummaryCard } from "@/components/ui/StatSummaryCard";
-import { SectionLabel } from "@/components/ui/SectionLabel";
-import { Pill } from "@/components/ui/Pill";
 import { MOCK_SIMULADOS } from "@/lib/mockData";
 import { getData, STORAGE_KEYS } from "@/lib/storage";
 import type { Simulado, SimuladoResult } from "@/lib/types";
@@ -50,15 +47,6 @@ export default function SimuladosScreen() {
     const result = getResultForSimulado(item.id);
     const pct = result ? Math.round((result.score / result.total) * 100) : null;
 
-    const pillTone =
-      pct === null
-        ? "primary"
-        : pct >= 70
-        ? "primary"
-        : pct >= 50
-        ? "warning"
-        : "destructive";
-
     return (
       <Pressable
         style={({ pressed }) => [
@@ -72,7 +60,9 @@ export default function SimuladosScreen() {
         onPress={() => router.push(`/simulado/${item.id}` as any)}
       >
         <View style={styles.cardTop}>
-          <View style={[styles.simuladoIcon, { backgroundColor: colors.primarySoft }]}>
+          <View
+            style={[styles.simuladoIcon, { backgroundColor: colors.primary + "20" }]}
+          >
             <Feather name="clipboard" size={20} color={colors.primary} />
           </View>
           <View style={styles.cardInfo}>
@@ -98,12 +88,35 @@ export default function SimuladosScreen() {
               {item.timeLimit} min
             </Text>
           </View>
-          <View style={styles.resultPill}>
-            <Pill
-              label={pct !== null ? `${pct}% — Refazer` : "Iniciar"}
-              tone={pillTone}
-            />
-          </View>
+          {pct !== null ? (
+            <View
+              style={[
+                styles.resultBadge,
+                {
+                  backgroundColor:
+                    pct >= 70 ? colors.success + "22" : pct >= 50 ? colors.warning + "22" : colors.destructive + "22",
+                },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.resultText,
+                  {
+                    color:
+                      pct >= 70 ? colors.success : pct >= 50 ? colors.warning : colors.destructive,
+                  },
+                ]}
+              >
+                {pct}% — Refazer
+              </Text>
+            </View>
+          ) : (
+            <View style={[styles.resultBadge, { backgroundColor: colors.primary + "22" }]}>
+              <Text style={[styles.resultText, { color: colors.primary }]}>
+                Iniciar
+              </Text>
+            </View>
+          )}
         </View>
       </Pressable>
     );
@@ -117,33 +130,64 @@ export default function SimuladosScreen() {
         renderItem={renderSimulado}
         ListHeaderComponent={
           <View style={styles.listHeader}>
-            <StatSummaryCard
-              stats={[
-                {
-                  value: String(MOCK_SIMULADOS.length),
-                  label: "Disponíveis",
-                  color: colors.primary,
-                },
-                {
-                  value: String(stats.completed),
-                  label: "Realizados",
-                  color: colors.success,
-                },
-                {
-                  value: stats.completed > 0 ? `${stats.avg}%` : "--",
-                  label: "Média geral",
-                  color:
-                    stats.avg >= 70
-                      ? colors.success
-                      : stats.avg >= 50
-                      ? colors.warning
-                      : stats.completed > 0
-                      ? colors.destructive
-                      : colors.mutedForeground,
-                },
-              ]}
-            />
-            <SectionLabel>Lista de simulados</SectionLabel>
+            <View style={styles.statsRow}>
+              <View
+                style={[
+                  styles.statCard,
+                  { backgroundColor: colors.card, borderColor: colors.border },
+                ]}
+              >
+                <Text style={[styles.statNum, { color: colors.primary }]}>
+                  {MOCK_SIMULADOS.length}
+                </Text>
+                <Text style={[styles.statLabel, { color: colors.mutedForeground }]}>
+                  Disponíveis
+                </Text>
+              </View>
+              <View
+                style={[
+                  styles.statCard,
+                  { backgroundColor: colors.card, borderColor: colors.border },
+                ]}
+              >
+                <Text style={[styles.statNum, { color: colors.success }]}>
+                  {stats.completed}
+                </Text>
+                <Text style={[styles.statLabel, { color: colors.mutedForeground }]}>
+                  Realizados
+                </Text>
+              </View>
+              <View
+                style={[
+                  styles.statCard,
+                  { backgroundColor: colors.card, borderColor: colors.border },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.statNum,
+                    {
+                      color:
+                        stats.avg >= 70
+                          ? colors.success
+                          : stats.avg >= 50
+                          ? colors.warning
+                          : stats.completed > 0
+                          ? colors.destructive
+                          : colors.mutedForeground,
+                    },
+                  ]}
+                >
+                  {stats.completed > 0 ? `${stats.avg}%` : "--"}
+                </Text>
+                <Text style={[styles.statLabel, { color: colors.mutedForeground }]}>
+                  Média geral
+                </Text>
+              </View>
+            </View>
+            <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>
+              LISTA DE SIMULADOS
+            </Text>
           </View>
         }
         contentContainerStyle={[
@@ -159,7 +203,30 @@ export default function SimuladosScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   list: { gap: 0 },
-  listHeader: { padding: 16, gap: 16 },
+  listHeader: { padding: 16, gap: 14 },
+  statsRow: { flexDirection: "row", gap: 10 },
+  statCard: {
+    flex: 1,
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 14,
+    alignItems: "center",
+    gap: 4,
+  },
+  statNum: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 22,
+  },
+  statLabel: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 11,
+    textAlign: "center",
+  },
+  sectionLabel: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 11,
+    letterSpacing: 1,
+  },
   card: {
     marginHorizontal: 16,
     marginBottom: 10,
@@ -208,7 +275,14 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_400Regular",
     fontSize: 12,
   },
-  resultPill: {
+  resultBadge: {
     marginLeft: "auto",
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 20,
+  },
+  resultText: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 12,
   },
 });

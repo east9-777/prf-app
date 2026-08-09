@@ -14,7 +14,7 @@ export default function Index() {
           resizeMode="contain"
         />
         <Text style={styles.title}>Project P.R.F</Text>
-        <ActivityIndicator size="large" color="#2FBF71" style={styles.spinner} />
+        <ActivityIndicator size="large" color="#1565C0" style={styles.spinner} />
       </View>
     );
   }
