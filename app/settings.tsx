@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Platform,
@@ -6,43 +6,42 @@ import {
   StyleSheet,
   Switch,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { Stack, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useAuth } from "@/context/AuthContext";
 import { useColors } from "@/hooks/useColors";
+import { useDisplayName } from "@/hooks/useDisplayName";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function SettingsScreen() {
   const colors = useColors();
-  const { user, logout } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { displayName, setDisplayName, loaded } = useDisplayName();
 
+  const [nameInput, setNameInput] = useState("");
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [newPostsNotif, setNewPostsNotif] = useState(true);
   const [commentsNotif, setCommentsNotif] = useState(true);
 
-  const handleLogout = () => {
-    Alert.alert("Sair", "Deseja realmente sair da sua conta?", [
-      { text: "Cancelar", style: "cancel" },
-      {
-        text: "Sair",
-        style: "destructive",
-        onPress: async () => {
-          await logout();
-        },
-      },
-    ]);
+  useEffect(() => {
+    if (loaded) setNameInput(displayName);
+  }, [loaded, displayName]);
+
+  const nameChanged = nameInput.trim() !== displayName;
+
+  const handleSaveName = async () => {
+    await setDisplayName(nameInput);
   };
 
   const handleClearData = () => {
     Alert.alert(
       "Limpar dados",
-      "Isso irá remover todo o seu progresso de estudos e resultados de simulados. Sua conta será mantida.",
+      "Isso irá remover todo o seu progresso de estudos e resultados de simulados salvos neste aparelho. Seu nome de exibição será mantido.",
       [
         { text: "Cancelar", style: "cancel" },
         {
@@ -128,9 +127,9 @@ export default function SettingsScreen() {
         <Text style={[styles.rowValue, { color: colors.mutedForeground }]}>
           {value}
         </Text>
-      ) : (
+      ) : onPress ? (
         <Feather name="chevron-right" size={16} color={colors.mutedForeground} />
-      )}
+      ) : null}
     </TouchableOpacity>
   );
 
@@ -152,31 +151,41 @@ export default function SettingsScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <View
-          style={[
-            styles.profileCard,
-            { backgroundColor: colors.card, borderColor: colors.border },
-          ]}
-        >
-          <View
-            style={[
-              styles.profileAvatar,
-              { backgroundColor: colors.primary + "20" },
-            ]}
-          >
-            <Text style={[styles.profileInitial, { color: colors.primary }]}>
-              {user?.username?.[0]?.toUpperCase() ?? "U"}
-            </Text>
+        <Section title="PERFIL">
+          <View style={styles.nameRow}>
+            <View
+              style={[
+                styles.profileAvatar,
+                { backgroundColor: colors.primary + "20" },
+              ]}
+            >
+              <Text style={[styles.profileInitial, { color: colors.primary }]}>
+                {nameInput?.[0]?.toUpperCase() ?? "?"}
+              </Text>
+            </View>
+            <TextInput
+              style={[styles.nameInput, { color: colors.text, borderColor: colors.border }]}
+              value={nameInput}
+              onChangeText={setNameInput}
+              placeholder="Como podemos te chamar?"
+              placeholderTextColor={colors.mutedForeground}
+              maxLength={30}
+              returnKeyType="done"
+              onSubmitEditing={handleSaveName}
+            />
           </View>
-          <View>
-            <Text style={[styles.profileName, { color: colors.text }]}>
-              @{user?.username}
-            </Text>
-            <Text style={[styles.profileEmail, { color: colors.mutedForeground }]}>
-              {user?.email}
-            </Text>
-          </View>
-        </View>
+          {nameChanged && (
+            <TouchableOpacity
+              style={[styles.saveNameBtn, { borderTopColor: colors.border }]}
+              onPress={handleSaveName}
+            >
+              <Feather name="check" size={16} color={colors.primary} />
+              <Text style={[styles.saveNameText, { color: colors.primary }]}>
+                Salvar nome
+              </Text>
+            </TouchableOpacity>
+          )}
+        </Section>
 
         <Section title="NOTIFICAÇÕES">
           <Row
@@ -203,33 +212,13 @@ export default function SettingsScreen() {
           />
         </Section>
 
-        <Section title="CONTA">
-          <Row
-            icon="user"
-            label="Cargo atual"
-            value={
-              user?.role === "administrador"
-                ? "Administrador"
-                : user?.role === "instrutor"
-                ? "Instrutor"
-                : "Usuário"
-            }
-          />
+        <Section title="SOBRE">
           <Row
             icon="info"
             label="Créditos"
             onPress={() => router.push("/credits" as any)}
-            isLast={user?.role !== "administrador"}
+            isLast
           />
-          {user?.role === "administrador" && (
-            <Row
-              icon="shield"
-              label="Painel de Administração"
-              onPress={() => router.push("/admin" as any)}
-              color={colors.primary}
-              isLast
-            />
-          )}
         </Section>
 
         <Section title="DADOS">
@@ -242,21 +231,8 @@ export default function SettingsScreen() {
           />
         </Section>
 
-        <TouchableOpacity
-          style={[
-            styles.logoutBtn,
-            { backgroundColor: colors.destructive + "18", borderColor: colors.destructive + "40" },
-          ]}
-          onPress={handleLogout}
-        >
-          <Feather name="log-out" size={18} color={colors.destructive} />
-          <Text style={[styles.logoutText, { color: colors.destructive }]}>
-            Sair da conta
-          </Text>
-        </TouchableOpacity>
-
         <Text style={[styles.footer, { color: colors.mutedForeground }]}>
-          Aprovação PRF v1.0.0{"\n"}Desenvolvido por Leivison
+          Project P.R.F v1.0.0{"\n"}Desenvolvido por Leivison
         </Text>
       </ScrollView>
     </View>
@@ -266,24 +242,36 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   scroll: { padding: 16, gap: 20 },
-  profileCard: {
+  nameRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 14,
     padding: 16,
-    borderRadius: 14,
-    borderWidth: 1,
   },
   profileAvatar: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: "center",
     justifyContent: "center",
   },
-  profileInitial: { fontFamily: "Inter_700Bold", fontSize: 22 },
-  profileName: { fontFamily: "Inter_700Bold", fontSize: 16 },
-  profileEmail: { fontFamily: "Inter_400Regular", fontSize: 13, marginTop: 2 },
+  profileInitial: { fontFamily: "Inter_700Bold", fontSize: 18 },
+  nameInput: {
+    flex: 1,
+    fontFamily: "Inter_500Medium",
+    fontSize: 15,
+    borderBottomWidth: 1,
+    paddingVertical: 6,
+  },
+  saveNameBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 12,
+    borderTopWidth: StyleSheet.hairlineWidth,
+  },
+  saveNameText: { fontFamily: "Inter_600SemiBold", fontSize: 14 },
   section: { gap: 8 },
   sectionTitle: {
     fontFamily: "Inter_600SemiBold",
@@ -305,16 +293,6 @@ const styles = StyleSheet.create({
   },
   rowLabel: { fontFamily: "Inter_500Medium", fontSize: 15, flex: 1 },
   rowValue: { fontFamily: "Inter_400Regular", fontSize: 14 },
-  logoutBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-    paddingVertical: 14,
-    borderRadius: 14,
-    borderWidth: 1,
-  },
-  logoutText: { fontFamily: "Inter_600SemiBold", fontSize: 15 },
   footer: {
     fontFamily: "Inter_400Regular",
     fontSize: 12,

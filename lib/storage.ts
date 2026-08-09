@@ -1,15 +1,11 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const STORAGE_KEYS = {
-  USER: "@prf/user",
-  USERS_LIST: "@prf/users_list",
-  POSTS: "@prf/posts",
-  COMMENTS: "@prf/comments",
+  DISPLAY_NAME: "@prf/display_name",
   STUDY_PROGRESS: "@prf/study_progress",
   SIMULADO_RESULTS: "@prf/simulado_results",
   SCHEDULE: "@prf/schedule",
   NOTIFICATIONS: "@prf/notifications",
-  COMMUNITY_POSTS: "@prf/community_posts",
 };
 
 export async function storeData<T>(key: string, value: T): Promise<void> {

@@ -8,31 +8,17 @@ import {
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import * as ImagePicker from "expo-image-picker";
 import React, { useEffect } from "react";
-import { Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { AuthProvider } from "@/context/AuthContext";
 
 SplashScreen.preventAutoHideAsync();
 const queryClient = new QueryClient();
 
-async function requestPermissions() {
-  if (Platform.OS === "web") return;
-
-  const { status: mediaStatus } = await ImagePicker.getMediaLibraryPermissionsAsync();
-  if (mediaStatus !== "granted") {
-    await ImagePicker.requestMediaLibraryPermissionsAsync();
-  }
-}
-
 function RootLayoutNav() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="login" />
-      <Stack.Screen name="setup-username" />
       <Stack.Screen name="(tabs)" />
       <Stack.Screen
         name="subject/[id]"
@@ -66,10 +52,6 @@ function RootLayoutNav() {
         name="settings"
         options={{ headerShown: true }}
       />
-      <Stack.Screen
-        name="profile/[username]"
-        options={{ headerShown: true }}
-      />
     </Stack>
   );
 }
@@ -85,7 +67,6 @@ export default function RootLayout() {
   useEffect(() => {
     if (fontsLoaded || fontError) {
       SplashScreen.hideAsync();
-      requestPermissions();
     }
   }, [fontsLoaded, fontError]);
 
@@ -96,12 +77,11 @@ export default function RootLayout() {
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
           <GestureHandlerRootView>
-            <AuthProvider>
-              <RootLayoutNav />
-            </AuthProvider>
+            <RootLayoutNav />
           </GestureHandlerRootView>
         </QueryClientProvider>
       </ErrorBoundary>
     </SafeAreaProvider>
   );
 }
+

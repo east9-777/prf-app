@@ -152,22 +152,6 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="perfil"
-          options={{
-            title: "Perfil",
-            header: () => (
-              <PRFHeader
-                onMenuPress={() => setDrawerOpen(true)}
-                onSearchPress={() => router.push("/search" as any)}
-              />
-            ),
-            headerShown: true,
-            tabBarIcon: ({ color }) => (
-              <Feather name="user" size={22} color={color} />
-            ),
-          }}
-        />
-        <Tabs.Screen
           name="notificacoes"
           options={{ href: null }}
         />

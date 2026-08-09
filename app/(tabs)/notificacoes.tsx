@@ -18,10 +18,8 @@ import type { Notification } from "@/lib/types";
 import { formatRelative } from "@/lib/dateUtils";
 
 const ICON_MAP: Record<string, keyof typeof Feather.glyphMap> = {
-  like: "heart",
-  comment: "message-circle",
-  reply: "corner-down-right",
-  new_post: "rss",
+  reminder: "clock",
+  content_update: "download",
   system: "info",
 };
 

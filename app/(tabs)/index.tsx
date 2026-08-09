@@ -10,12 +10,12 @@ import {
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useAuth } from "@/context/AuthContext";
 import { useColors } from "@/hooks/useColors";
+import { useDisplayName } from "@/hooks/useDisplayName";
 
 export default function InicioScreen() {
   const colors = useColors();
-  const { user } = useAuth();
+  const { displayName } = useDisplayName();
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
@@ -68,7 +68,7 @@ export default function InicioScreen() {
       >
         <View style={[styles.welcome, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <Text style={[styles.greeting, { color: colors.mutedForeground }]}>
-            Olá, {user?.username ? `@${user.username}` : "candidato"} 👋
+            Olá, {displayName || "candidato"} 👋
           </Text>
           <Text style={[styles.welcomeTitle, { color: colors.text }]}>
             Bem-vindo ao{"\n"}

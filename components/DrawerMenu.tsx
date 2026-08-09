@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 import {
   Animated,
   Dimensions,
+  Image,
   Modal,
   Pressable,
   StyleSheet,
@@ -12,9 +13,8 @@ import {
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Avatar } from "@/components/Avatar";
-import { useAuth } from "@/context/AuthContext";
 import { useColors } from "@/hooks/useColors";
+import { useDisplayName } from "@/hooks/useDisplayName";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const DRAWER_WIDTH = Math.min(SCREEN_WIDTH * 0.78, 320);
@@ -25,7 +25,6 @@ interface DrawerMenuProps {
 }
 
 const MENU_ITEMS = [
-  { icon: "user" as const, label: "Meu Perfil", route: "/(tabs)/perfil" },
   { icon: "calendar" as const, label: "Meu Cronograma", route: "/cronograma" },
   { icon: "flag" as const, label: "Etapas do Concurso", route: "/etapas" },
   { icon: "settings" as const, label: "Configurações", route: "/settings" },
@@ -34,7 +33,7 @@ const MENU_ITEMS = [
 
 export function DrawerMenu({ visible, onClose }: DrawerMenuProps) {
   const colors = useColors();
-  const { user, logout } = useAuth();
+  const { displayName } = useDisplayName();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const slideAnim = useRef(new Animated.Value(-DRAWER_WIDTH)).current;
@@ -77,13 +76,6 @@ export function DrawerMenu({ visible, onClose }: DrawerMenuProps) {
     setTimeout(() => router.push(route as any), 200);
   };
 
-  const handleLogout = async () => {
-    onClose();
-    setTimeout(async () => {
-      await logout();
-    }, 200);
-  };
-
   return (
     <Modal visible={visible} transparent animationType="none" onRequestClose={onClose}>
       <Animated.View style={[styles.overlay, { opacity: opacityAnim }]}>
@@ -103,7 +95,7 @@ export function DrawerMenu({ visible, onClose }: DrawerMenuProps) {
       >
         <View
           style={[
-            styles.profileSection,
+            styles.brandSection,
             {
               paddingTop: insets.top + 20,
               borderBottomColor: colors.border,
@@ -111,10 +103,19 @@ export function DrawerMenu({ visible, onClose }: DrawerMenuProps) {
             },
           ]}
         >
-          <Avatar uri={user?.photoURL} name={user?.username} size="lg" />
-          <Text style={[styles.username, { color: colors.text }]}>
-            @{user?.username}
+          <Image
+            source={require("@/assets/images/logo.png")}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+          <Text style={[styles.brandTitle, { color: colors.text }]}>
+            Project <Text style={{ color: colors.primary }}>P.R.F</Text>
           </Text>
+          {!!displayName && (
+            <Text style={[styles.greeting, { color: colors.mutedForeground }]}>
+              Olá, {displayName}
+            </Text>
+          )}
         </View>
 
         <View style={styles.menu}>
@@ -132,19 +133,6 @@ export function DrawerMenu({ visible, onClose }: DrawerMenuProps) {
             </TouchableOpacity>
           ))}
         </View>
-
-        <TouchableOpacity
-          style={[
-            styles.logoutBtn,
-            { borderTopColor: colors.border, paddingBottom: insets.bottom + 16 },
-          ]}
-          onPress={handleLogout}
-        >
-          <Feather name="log-out" size={20} color={colors.destructive} />
-          <Text style={[styles.logoutText, { color: colors.destructive }]}>
-            Sair
-          </Text>
-        </TouchableOpacity>
       </Animated.View>
     </Modal>
   );
@@ -161,18 +149,26 @@ const styles = StyleSheet.create({
     left: 0,
     bottom: 0,
     borderRightWidth: 1,
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
   },
-  profileSection: {
+  brandSection: {
     padding: 20,
     paddingBottom: 20,
-    gap: 8,
+    gap: 4,
     borderBottomWidth: 1,
   },
-  username: {
+  logo: {
+    width: 40,
+    height: 40,
+    marginBottom: 4,
+  },
+  brandTitle: {
     fontFamily: "Inter_700Bold",
     fontSize: 18,
-    marginTop: 4,
+  },
+  greeting: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 13,
   },
   menu: {
     flex: 1,
@@ -189,18 +185,6 @@ const styles = StyleSheet.create({
   menuLabel: {
     flex: 1,
     fontFamily: "Inter_500Medium",
-    fontSize: 15,
-  },
-  logoutBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    paddingHorizontal: 20,
-    paddingVertical: 18,
-    borderTopWidth: 1,
-  },
-  logoutText: {
-    fontFamily: "Inter_600SemiBold",
     fontSize: 15,
   },
 });

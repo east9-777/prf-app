@@ -52,12 +52,6 @@
           "sounds": [],
           "mode": "production"
         }
-      ],
-      [
-        "expo-image-picker",
-        {
-          "photosPermission": "Precisamos de acesso à sua galeria para você escolher uma foto de perfil."
-        }
       ]
     ],
     "experiments": {

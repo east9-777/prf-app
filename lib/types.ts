@@ -1,55 +1,3 @@
-export type UserRole = "usuario" | "instrutor" | "administrador";
-
-export interface User {
-  id: string;
-  username: string;
-  photoURL: string;
-  email: string;
-  role: UserRole;
-  createdAt: string;
-  postCount: number;
-  commentCount: number;
-  likesReceived: number;
-  savedPosts: string[];
-  blockedUsers: string[];
-  hiddenPosts: string[];
-  isSuspended?: boolean;
-  isBanned?: boolean;
-}
-
-export interface Post {
-  id: string;
-  authorId: string;
-  authorName: string;
-  authorPhoto: string;
-  authorRole: UserRole;
-  title: string;
-  text?: string;
-  imageURL?: string;
-  createdAt: string;
-  isPinned: boolean;
-  type: "novidades" | "comunidade";
-  likes: number;
-  likedBy: string[];
-  commentCount: number;
-  savedBy: string[];
-  reportedBy: string[];
-  isHidden?: boolean;
-}
-
-export interface Comment {
-  id: string;
-  postId: string;
-  authorId: string;
-  authorName: string;
-  authorPhoto: string;
-  text: string;
-  likes: number;
-  likedBy: string[];
-  createdAt: string;
-  parentId?: string;
-}
-
 export interface Topic {
   id: string;
   name: string;
@@ -101,12 +49,9 @@ export interface ScheduleItem {
 
 export interface Notification {
   id: string;
-  type: "like" | "comment" | "reply" | "new_post" | "system";
+  type: "reminder" | "content_update" | "system";
   title: string;
   body: string;
-  postId?: string;
-  fromUserName?: string;
-  fromUserPhoto?: string;
   createdAt: string;
   isRead: boolean;
 }
