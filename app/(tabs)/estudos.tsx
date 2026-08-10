@@ -26,7 +26,7 @@ export default function EstudosScreen() {
   useFocusEffect(
     useCallback(() => {
       getData<ProgressMap>(STORAGE_KEYS.STUDY_PROGRESS).then((p) => {
-        if (p) setProgress(p);
+        setProgress(p ?? {});
       });
     }, [])
   );

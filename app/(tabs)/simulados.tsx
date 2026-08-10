@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   FlatList,
   Platform,
@@ -8,7 +8,7 @@ import {
   View,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { MOCK_SIMULADOS } from "@/lib/mockData";
@@ -21,11 +21,13 @@ export default function SimuladosScreen() {
   const insets = useSafeAreaInsets();
   const [results, setResults] = useState<SimuladoResult[]>([]);
 
-  useEffect(() => {
-    getData<SimuladoResult[]>(STORAGE_KEYS.SIMULADO_RESULTS).then((r) => {
-      if (r) setResults(r);
-    });
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      getData<SimuladoResult[]>(STORAGE_KEYS.SIMULADO_RESULTS).then((r) => {
+        setResults(r ?? []);
+      });
+    }, [])
+  );
 
   const stats = useMemo(() => {
     const completed = results.length;
