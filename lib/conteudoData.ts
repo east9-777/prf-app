@@ -561,10 +561,10 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
         title: "Infrações e Penalidades",
         incidencia: "alta",
         content:
-          "Infrações classificam-se por gravidade: gravíssima (7 pontos), grave (5 pontos), média (4 pontos) e leve (3 pontos). A pontuação acumula na CNH. O condutor que acumular 20 ou mais pontos em 12 meses tem a CNH suspensa.\n\nInfrações gravíssimas com multa multiplicada: ultrapassar sinal vermelho (x3), dirigir sob efeito de álcool (x3), disputar racha (x7), usar celular ao dirigir (x3), não usar cinto de segurança.",
+          "Infrações classificam-se por gravidade: gravíssima (7 pontos), grave (5 pontos), média (4 pontos) e leve (3 pontos). A pontuação acumula na CNH. Desde a Lei 14.071/2020, o limite para suspensão não é mais fixo em 20 pontos: são 40 pontos (nenhuma infração gravíssima no período), 30 pontos (1 gravíssima) ou 20 pontos (2 ou mais gravíssimas) em 12 meses. Motorista profissional: sempre 40 pontos.\n\nInfrações gravíssimas com multa multiplicada: ultrapassar sinal vermelho (x3), usar celular ao dirigir (x3), disputar racha (x7), dirigir sob efeito de álcool (x10 — o maior multiplicador), não usar cinto de segurança.",
         keyPoints: [
           "Gravíssima: 7 pontos; Grave: 5; Média: 4; Leve: 3",
-          "Suspensão de CNH: 20+ pontos em 12 meses",
+          "Suspensão de CNH (Lei 14.071/2020): 40 pontos (0 gravíssimas), 30 pontos (1 gravíssima) ou 20 pontos (2+ gravíssimas) em 12 meses; motorista profissional: sempre 40 pontos",
           "Dirigir embriagado (art. 165): gravíssima, multa x10, suspensão de 12 meses",
           "Racha (art. 308): crime + infração gravíssima (multa x7)",
           "Ultrapassar sinal vermelho: gravíssima, multa x3",
@@ -589,7 +589,7 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
         ],
         examples: [
           { label: "CERTO", sentence: "Dirigir utilizando telefone celular enquanto o veículo está em movimento é infração gravíssima com multa multiplicada por três.", explanation: "Art. 252, V do CTB — correto." },
-          { label: "ERRADO", sentence: "O condutor que acumular 15 pontos em 12 meses terá a CNH suspensa.", explanation: "A suspensão ocorre com 20 ou mais pontos (art. 261 CTB), não 15." },
+          { label: "ERRADO", sentence: "O condutor que acumular 15 pontos em 12 meses terá a CNH suspensa.", explanation: "Mesmo pela regra mais rígida (2+ infrações gravíssimas), o limite mínimo é 20 pontos — 15 pontos não gera suspensão (art. 261 CTB, com redação da Lei 14.071/2020)." },
         ],
         exercises: [
           {
@@ -604,12 +604,12 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
         title: "Crimes de Trânsito (Arts. 302 a 312)",
         incidencia: "alta",
         content:
-          "O CTB prevê crimes no capítulo XIX (arts. 302-312). Principais crimes:\n• Homicídio culposo (art. 302): 2 a 4 anos de detenção\n• Lesão corporal culposa (art. 303): 6 meses a 2 anos\n• Embriaguez ao volante (art. 306): 6 meses a 3 anos\n• Racha/Pelotão (art. 308): 1 a 3 anos / 3 a 6 anos (se resultado lesão/morte)\n• Fuga do local do acidente (art. 305): 6 meses a 1 ano",
+          "O CTB prevê crimes no capítulo XIX (arts. 302-312). Principais crimes:\n• Homicídio culposo (art. 302): 2 a 4 anos de detenção\n• Lesão corporal culposa (art. 303): 6 meses a 2 anos\n• Embriaguez ao volante (art. 306): 6 meses a 3 anos\n• Racha/Pelotão (art. 308): 6 meses a 3 anos; 3 a 6 anos (se lesão grave); 5 a 10 anos (se morte)\n• Fuga do local do acidente (art. 305): 6 meses a 1 ano",
         keyPoints: [
           "Art. 302: homicídio culposo — 2 a 4 anos (causas de aumento: embriaguez, racha, excesso de velocidade)",
           "Art. 303: lesão corporal culposa — 6 meses a 2 anos",
           "Art. 306: embriaguez ao volante — 6 meses a 3 anos (0,3 mg/L ar alveolar)",
-          "Art. 308: racha sem resultado — 1 a 3 anos; com lesão grave — 3 a 6 anos; com morte — 5 a 10 anos",
+          "Art. 308: racha sem resultado — 6 meses a 3 anos; com lesão grave — 3 a 6 anos; com morte — 5 a 10 anos",
           "Art. 305: fuga do local — 6 meses a 1 ano + suspensão",
           "Ação penal pública incondicionada para todos os crimes de trânsito",
         ],
@@ -628,7 +628,7 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
               ["305", "Fuga do local",            "6 meses a 1 ano + suspensão"],
               ["306", "Embriaguez ao volante",    "6 meses a 3 anos + multa + suspensão"],
               ["307", "Violar suspensão da CNH",  "6 meses a 1 ano + multa"],
-              ["308", "Racha (sem resultado)",    "1 a 3 anos + suspensão + multa"],
+              ["308", "Racha (sem resultado)",    "6 meses a 3 anos + suspensão + multa"],
               ["308§2", "Racha com morte",        "5 a 10 anos + suspensão"],
             ],
           },
@@ -833,7 +833,7 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Colisão perfeitamente inelástica: os corpos ficam juntos após o choque",
           "Conservação do momento linear: m₁v₁ + m₂v₂ = (m₁+m₂)·vf",
           "Triângulo de segurança: afastar-se 30m (pista) e 100m (rodovia)",
-          "Impacto a 60 km/h equivale a cair de um prédio de ~7 andares",
+          "Impacto a 60 km/h equivale a cair de um prédio de ~5 andares (aprox. 15 metros), segundo campanhas da SENATRAN",
         ],
         highlights: [
           { type: "muito-cobrado", text: "Ec ∝ v²: dobrar a velocidade → Ec quadruplica. A 120 km/h, a energia de impacto é 4 vezes maior que a 60 km/h." },
@@ -968,12 +968,12 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
         title: "Licitações (Lei 14.133/2021)",
         incidencia: "alta",
         content:
-          "A Nova Lei de Licitações (Lei 14.133/2021) substituiu a Lei 8.666/93. Modalidades: Pregão, Concorrência, Concurso, Leilão e Diálogo Competitivo.\n\nDispensa de licitação: contratações abaixo dos limites (R$ 50.000 para obras; R$ 100.000 para serviços — art. 75). Inexigibilidade: inviabilidade de competição (fornecedor exclusivo, serviço técnico singular, artista consagrado).",
+          "A Nova Lei de Licitações (Lei 14.133/2021) substituiu a Lei 8.666/93. Modalidades: Pregão, Concorrência, Concurso, Leilão e Diálogo Competitivo.\n\nDispensa de licitação: contratações abaixo dos limites do art. 75 — valores atualizados anualmente por decreto (vigentes desde jan/2026): R$ 130.984,20 para obras/serviços de engenharia; R$ 65.492,11 para demais serviços/compras. Inexigibilidade: inviabilidade de competição (fornecedor exclusivo, serviço técnico singular, artista consagrado).",
         keyPoints: [
           "Lei 14.133/2021: substituiu a 8.666/93 e demais normas",
           "Modalidades: Pregão (mais usado), Concorrência, Concurso, Leilão, Diálogo Competitivo",
           "Pregão: sempre para bens/serviços comuns; eletrônico como regra",
-          "Dispensa por valor: obras ≤ R$100k (art. 75, I); outros ≤ R$50k",
+          "Dispensa por valor (art. 75, valores 2026): obras/engenharia ≤ R$130.984,20; outros serviços/compras ≤ R$65.492,11 — atualizados anualmente por decreto",
           "Inexigibilidade: inviabilidade de competição (fornecedor exclusivo, artista)",
           "Contratação direta: dispensa + inexigibilidade",
           "Improbidade administrativa se houver irregularidade grave em licitação",
@@ -1065,7 +1065,7 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Enriquecimento ilícito (art. 9): mais grave — suspensão de direitos por 14 anos",
           "Dano ao erário (art. 10): exige dolo + efetivo dano",
           "Violação de princípios (art. 11): dolo + lesividade ao erário ou à sociedade",
-          "Prescrição: 8 anos a partir do término do exercício de cargo",
+          "Prescrição: 8 anos a partir da ocorrência do fato (Lei 14.230/2021 mudou o termo inicial — antes era do fim do exercício do cargo)",
           "Legitimidade ativa: apenas o MP (cidadão perdeu a legitimidade)",
         ],
         highlights: [
@@ -1448,23 +1448,23 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
         title: "Inquérito Policial",
         incidencia: "alta",
         content:
-          "Inquérito policial (IP): procedimento administrativo presidido pelo delegado de polícia, destinado a apurar a autoria e materialidade do delito.\n\nCaracterísticas: inquisitório (não há contraditório pleno), sigiloso, escrito, indisponível (o delegado não pode arquivar), dispensável (pode haver denúncia sem IP).\n\nPrazo: indiciado solto — 30 dias (prorrogável); indiciado preso — 10 dias.",
+          "Inquérito policial (IP): procedimento administrativo presidido pelo delegado de polícia, destinado a apurar a autoria e materialidade do delito.\n\nCaracterísticas: inquisitório (não há contraditório pleno), sigiloso, escrito, indisponível (o delegado não pode arquivar), dispensável (pode haver denúncia sem IP).\n\nPrazo: indiciado solto — 30 dias (prorrogável); indiciado preso — 10 dias.\n\nArquivamento (art. 28 CPP, redação da Lei 13.964/2019 — Pacote Anticrime): não é mais o juiz quem decide. O MP ORDENA o arquivamento e comunica vítima, investigado e autoridade policial; cabe revisão dentro da própria instância do MP. O STF (ADIs 6298/6299/6300/6305) ajustou que o MP ainda submete a manifestação ao juiz, que é comunicado — mas quem decide continua sendo o MP.",
         keyPoints: [
           "IP: procedimento ADMINISTRATIVO — não é processo judicial",
           "Presidido pelo Delegado de Polícia",
           "Natureza inquisitória: não há contraditório e ampla defesa plenos",
           "Prazo para conclusão: preso — 10 dias; solto — 30 dias (prorrogável)",
-          "Arquivamento: só o juiz pode arquivar, mediante pedido do MP",
+          "Arquivamento (pós Lei 13.964/2019): o MP ordena o arquivamento — não é mais decisão do juiz; cabe revisão interna do MP, com o juiz apenas comunicado",
           "IP é dispensável: MP pode oferecer denúncia com outros elementos",
           "Notitia criminis: comunicação da infração penal à polícia",
         ],
         highlights: [
           { type: "muito-cobrado", text: "IP é procedimento ADMINISTRATIVO (não processo judicial). O delegado PRESIDE mas não julga. O MP é o titular da ação penal (não o delegado)." },
-          { type: "pegadinha", text: "O DELEGADO não pode arquivar o inquérito — isso cabe ao JUIZ, a pedido do MP. Se o MP requer o arquivamento e o juiz discorda, remete ao PGR/PGJ." },
+          { type: "pegadinha", text: "O DELEGADO não pode arquivar o inquérito — quem ordena o arquivamento é o MP (não mais o juiz, desde a Lei 13.964/2019). Antes dessa lei, era o juiz quem decidia a pedido do MP; essa é uma pegadinha clássica de banca sobre legislação desatualizada." },
         ],
         examples: [
           { label: "CERTO", sentence: "O inquérito policial pode ser dispensado quando o MP dispuser de elementos suficientes para oferecer a denúncia.", explanation: "O IP é dispensável — o MP pode oferecer denúncia com base em outros elementos de prova." },
-          { label: "ERRADO", sentence: "O delegado de polícia pode determinar o arquivamento do inquérito policial quando entender que não há indícios de autoria.", explanation: "O arquivamento do IP compete ao JUIZ, mediante requerimento do MP — nunca ao delegado." },
+          { label: "ERRADO", sentence: "O delegado de polícia pode determinar o arquivamento do inquérito policial quando entender que não há indícios de autoria.", explanation: "O arquivamento do IP compete ao MP (que o ordena diretamente, desde a Lei 13.964/2019) — nunca ao delegado." },
         ],
         exercises: [
           {
@@ -1563,7 +1563,7 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
         title: "Lei Orgânica e Estatuto da PRF",
         incidencia: "alta",
         content:
-          "A PRF foi criada pelo Decreto nº 9.583/2018. Sua lei orgânica está em construção. A Lei 9.503/1997 (CTB) define as atribuições no trânsito. A PRF é órgão da Polícia Federal? NÃO — é órgão próprio, vinculado ao Ministério da Justiça.\n\nAtribuições da PRF: patrulhamento ostensivo das rodovias federais, fiscalização e controle do trânsito, prestação de socorro às vítimas, repressão ao crime no âmbito das rodovias.",
+          "A PRF foi criada em 24/07/1928 pelo Decreto nº 18.323, do presidente Washington Luís, com o nome inicial de \"Polícia de Estradas\". Suas competências atuais são definidas pela CF/88 (art. 144), pela Lei 9.503/97 (CTB, art. 20) e pelo Decreto nº 11.348/2023, que regulamenta a estrutura e atribuições do órgão. A PRF é órgão da Polícia Federal? NÃO — é órgão próprio, vinculado ao Ministério da Justiça e Segurança Pública.\n\nAtribuições da PRF: patrulhamento ostensivo das rodovias federais, fiscalização e controle do trânsito, prestação de socorro às vítimas, repressão ao crime no âmbito das rodovias.",
         keyPoints: [
           "PRF: órgão policial autônomo — não é subordinada à PF",
           "Vinculada ao Ministério da Justiça e Segurança Pública",
@@ -1890,7 +1890,7 @@ export const CONTEUDO_SUBJECTS: ConteudoSubject[] = [
           "Windows: sistema proprietário da Microsoft. Versões relevantes: Windows 10 e 11. Linux: sistema open-source (código aberto), núcleo desenvolvido por Linus Torvalds (1991). Distribuições: Ubuntu, Debian, Fedora, CentOS.\n\nO CEBRASPE cobra comandos básicos do Windows (CMD) e do terminal Linux.",
         keyPoints: [
           "Windows: proprietário — pago; Linux: código aberto — gratuito",
-          "Gerenciador de tarefas: Ctrl+Alt+Del (Windows)",
+          "Gerenciador de tarefas: Ctrl+Shift+Esc (atalho direto). Ctrl+Alt+Del abre a tela de segurança (bloquear, trocar usuário, sair), que também dá acesso ao gerenciador",
           "Extensões: .exe (executável), .docx (Word), .xlsx (Excel), .pdf",
           "Linux — comandos básicos: ls (listar), cd (mudar dir.), mkdir (criar pasta), rm (remover), cp (copiar)",
           "Partições: formatação divide o HD — NTFS (Windows), ext4 (Linux), FAT32",

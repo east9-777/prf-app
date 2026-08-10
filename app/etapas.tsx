@@ -62,11 +62,13 @@ const STAGES = [
     description: "Avaliação da aptidão física dos candidatos. Testes específicos para homens e mulheres. Caráter eliminatório.",
     criteria: [
       "Corrida de 12 minutos (Teste de Cooper)",
-      "Homens: mínimo 2.400 metros",
-      "Mulheres: mínimo 2.100 metros",
-      "Barra fixa (homens): mínimo 6 repetições",
-      "Flexão de braço no solo (mulheres): mínimo 20 repetições",
-      "Abdominal: 30 repetições em 60 segundos",
+      "Homens: mínimo 2.301 metros",
+      "Mulheres: mínimo 2.001 metros",
+      "Barra fixa (homens): mínimo 3 repetições",
+      "Suspensão na barra fixa (mulheres): queixo acima da barra por, no mínimo, 10 segundos",
+      "Abdominal em 1 minuto: mínimo varia por sexo e faixa etária (consulte a tabela do edital vigente)",
+      "Shuttle run (teste de ir e vir): avalia agilidade",
+      "Impulsão horizontal (salto em distância parado): avalia potência muscular",
     ],
     tips: [
       "Comece o treino com pelo menos 6 meses de antecedência",
