@@ -5,7 +5,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  useColorScheme,
   View,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
@@ -22,36 +21,36 @@ const INCIDENCIA_CONFIG = {
 
 // ─── Highlight Box ────────────────────────────────────────────────────────────
 
-const HIGHLIGHT_CONFIG_LIGHT = {
-  atencao:         { label: "⚠️  Atenção",        bg: "#FEF3C7", border: "#F59E0B", text: "#92400E" },
-  pegadinha:       { label: "🪤  Pegadinha",       bg: "#FEE2E2", border: "#EF4444", text: "#991B1B" },
-  "muito-cobrado": { label: "🎯  Muito cobrado",   bg: "#EDE9FE", border: "#7C3AED", text: "#4C1D95" },
-  memorize:        { label: "🧠  Memorize",        bg: "#DBEAFE", border: "#3B82F6", text: "#1E3A8A" },
-  dica:            { label: "💡  Dica da banca",   bg: "#D1FAE5", border: "#10B981", text: "#064E3B" },
+const HIGHLIGHT_TONES = {
+  atencao:         { label: "⚠️  Atenção",        tone: "#F59E0B" },
+  pegadinha:       { label: "🪤  Pegadinha",       tone: "#EF4444" },
+  "muito-cobrado": { label: "🎯  Muito cobrado",   tone: "#7C3AED" },
+  memorize:        { label: "🧠  Memorize",        tone: "#3B82F6" },
+  dica:            { label: "💡  Dica da banca",   tone: "#10B981" },
 };
 
-const HIGHLIGHT_CONFIG_DARK = {
-  atencao:         { label: "⚠️  Atenção",        bg: "#422006", border: "#F59E0B", text: "#FCD34D" },
-  pegadinha:       { label: "🪤  Pegadinha",       bg: "#450A0A", border: "#EF4444", text: "#FCA5A5" },
-  "muito-cobrado": { label: "🎯  Muito cobrado",   bg: "#2E1065", border: "#7C3AED", text: "#C4B5FD" },
-  memorize:        { label: "🧠  Memorize",        bg: "#0C1A4A", border: "#3B82F6", text: "#93C5FD" },
-  dica:            { label: "💡  Dica da banca",   bg: "#022C22", border: "#10B981", text: "#6EE7B7" },
-};
-
-function HighlightBox({ type, text }: { type: keyof typeof HIGHLIGHT_CONFIG_LIGHT; text: string }) {
-  const scheme = useColorScheme();
-  const CONFIG = scheme === "dark" ? HIGHLIGHT_CONFIG_DARK : HIGHLIGHT_CONFIG_LIGHT;
-  const cfg = CONFIG[type] ?? CONFIG.atencao;
+function HighlightBox({ type, text }: { type: keyof typeof HIGHLIGHT_TONES; text: string }) {
+  const colors = useColors();
+  const cfg = HIGHLIGHT_TONES[type] ?? HIGHLIGHT_TONES.atencao;
   return (
-    <View style={[hStyles.box, { backgroundColor: cfg.bg, borderLeftColor: cfg.border }]}>
-      <Text style={[hStyles.label, { color: cfg.border }]}>{cfg.label}</Text>
-      <Text style={[hStyles.text, { color: cfg.text }]}>{text}</Text>
+    <View
+      style={[
+        hStyles.box,
+        {
+          backgroundColor: colors.card,
+          borderColor: colors.border,
+          borderLeftColor: cfg.tone,
+        },
+      ]}
+    >
+      <Text style={[hStyles.label, { color: cfg.tone }]}>{cfg.label}</Text>
+      <Text style={[hStyles.text, { color: colors.foreground }]}>{text}</Text>
     </View>
   );
 }
 
 const hStyles = StyleSheet.create({
-  box:   { borderLeftWidth: 3, borderRadius: 8, padding: 12, gap: 4 },
+  box:   { borderWidth: 1, borderLeftWidth: 3, borderRadius: 8, padding: 12, gap: 4 },
   label: { fontFamily: "Inter_700Bold", fontSize: 11, letterSpacing: 0.4 },
   text:  { fontFamily: "Inter_400Regular", fontSize: 13, lineHeight: 19 },
 });
@@ -59,34 +58,23 @@ const hStyles = StyleSheet.create({
 // ─── Example Row ─────────────────────────────────────────────────────────────
 
 function ExampleRow({ label, sentence, explanation }: { label: string; sentence: string; explanation?: string }) {
-  const scheme = useColorScheme();
-  const isDark = scheme === "dark";
+  const colors = useColors();
 
   const isCerto  = label === "CERTO"    || label === "Correto"   || label === "Exemplo";
   const isErrado = label === "ERRADO"   || label === "Incorreto";
 
-  const bg      = isCerto
-    ? (isDark ? "#022C22" : "#D1FAE5")
-    : isErrado
-    ? (isDark ? "#450A0A" : "#FEE2E2")
-    : (isDark ? "#1C1C1E" : "#F3F4F6");
-
-  const color   = isCerto
-    ? (isDark ? "#6EE7B7" : "#065F46")
-    : isErrado
-    ? (isDark ? "#FCA5A5" : "#991B1B")
-    : (isDark ? "#D1D5DB" : "#374151");
-
-  const badgeBg = isCerto ? "#10B981" : isErrado ? "#EF4444" : "#6B7280";
+  const badgeBg = isCerto ? colors.success : isErrado ? colors.destructive : colors.mutedForeground;
+  const tintBg  = isCerto ? colors.success + "14" : isErrado ? colors.destructive + "14" : colors.muted;
+  const tintBorder = badgeBg + "40";
 
   return (
-    <View style={[eStyles.row, { backgroundColor: bg, borderColor: badgeBg + "50" }]}>
+    <View style={[eStyles.row, { backgroundColor: tintBg, borderColor: tintBorder }]}>
       <View style={[eStyles.badge, { backgroundColor: badgeBg }]}>
         <Text style={eStyles.badgeText}>{label}</Text>
       </View>
-      <Text style={[eStyles.sentence, { color }]}>{sentence}</Text>
+      <Text style={[eStyles.sentence, { color: colors.foreground }]}>{sentence}</Text>
       {!!explanation && (
-        <Text style={[eStyles.explanation, { color: color + "CC" }]}>↳ {explanation}</Text>
+        <Text style={[eStyles.explanation, { color: colors.mutedForeground }]}>↳ {explanation}</Text>
       )}
     </View>
   );
@@ -103,29 +91,21 @@ const eStyles = StyleSheet.create({
 // ─── Data Table ───────────────────────────────────────────────────────────────
 
 function DataTable({ title, headers, rows }: { title?: string; headers: string[]; rows: string[][] }) {
-  const scheme = useColorScheme();
-  const isDark = scheme === "dark";
-
-  const titleColor  = isDark ? "#E6EDF3" : "#374151";
-  const borderColor = isDark ? "#30363D" : "#E5E7EB";
-  const headerBg    = isDark ? "#21262D" : "#F3F4F6";
-  const altBg       = isDark ? "#161B22" : "#F9FAFB";
-  const cellColor   = isDark ? "#C9D1D9" : "#374151";
-  const headerColor = isDark ? "#E6EDF3" : "#111827";
+  const colors = useColors();
 
   return (
     <View style={tStyles.wrap}>
-      {!!title && <Text style={[tStyles.title, { color: titleColor }]}>{title}</Text>}
-      <View style={[tStyles.table, { borderColor }]}>
-        <View style={[tStyles.row, { backgroundColor: headerBg }]}>
+      {!!title && <Text style={[tStyles.title, { color: colors.mutedForeground }]}>{title}</Text>}
+      <View style={[tStyles.table, { borderColor: colors.border }]}>
+        <View style={[tStyles.row, { backgroundColor: colors.muted }]}>
           {headers.map((h, i) => (
-            <Text key={i} style={[tStyles.cell, tStyles.headerCell, { flex: i === 0 ? 1.4 : 1, color: headerColor }]}>{h}</Text>
+            <Text key={i} style={[tStyles.cell, tStyles.headerCell, { flex: i === 0 ? 1.4 : 1, color: colors.text }]}>{h}</Text>
           ))}
         </View>
         {rows.map((row, ri) => (
-          <View key={ri} style={[tStyles.row, ri % 2 === 1 && { backgroundColor: altBg }]}>
+          <View key={ri} style={[tStyles.row, ri % 2 === 1 && { backgroundColor: colors.background }]}>
             {row.map((cell, ci) => (
-              <Text key={ci} style={[tStyles.cell, { flex: ci === 0 ? 1.4 : 1, fontFamily: ci === 0 ? "Inter_600SemiBold" : "Inter_400Regular", color: cellColor }]}>{cell}</Text>
+              <Text key={ci} style={[tStyles.cell, { flex: ci === 0 ? 1.4 : 1, fontFamily: ci === 0 ? "Inter_600SemiBold" : "Inter_400Regular", color: colors.foreground }]}>{cell}</Text>
             ))}
           </View>
         ))}
@@ -146,27 +126,19 @@ const tStyles = StyleSheet.create({
 // ─── Exercise Card ────────────────────────────────────────────────────────────
 
 function ExerciseCardFixed({ question, answer, explanation }: { question: string; answer: string; explanation: string }) {
+  const colors = useColors();
   const [revealed, setRevealed] = useState(false);
-  const scheme = useColorScheme();
-  const isDark = scheme === "dark";
   const isC = answer === "CERTO";
 
-  const questionColor  = isDark ? "#C9D1D9" : "#1F2937";
-  const tagColor       = isDark ? "#8B949E" : "#6B7280";
-  const btnBgHidden    = isDark ? "#1E1B4B" : "#EEF2FF";
-  const btnTextColor   = isDark ? "#818CF8" : "#4338CA";
-  const btnBgRevealed  = isC
-    ? (isDark ? "#022C22" : "#D1FAE5")
-    : (isDark ? "#450A0A" : "#FEE2E2");
-  const verdictColor   = isC
-    ? (isDark ? "#6EE7B7" : "#065F46")
-    : (isDark ? "#FCA5A5" : "#991B1B");
-  const expColor       = isDark ? "#C9D1D9" : "#374151";
+  const btnBgHidden    = colors.primary + "14";
+  const btnTextColor   = colors.primary;
+  const verdictColor   = isC ? colors.success : colors.destructive;
+  const btnBgRevealed  = verdictColor + "14";
 
   return (
     <View style={exStyles.wrap}>
-      <Text style={[exStyles.tag, { color: tagColor }]}>📝  Exercício Comentado (CEBRASPE)</Text>
-      <Text style={[exStyles.question, { color: questionColor }]}>{question}</Text>
+      <Text style={[exStyles.tag, { color: colors.mutedForeground }]}>📝  Exercício Comentado (CEBRASPE)</Text>
+      <Text style={[exStyles.question, { color: colors.foreground }]}>{question}</Text>
       <Pressable
         onPress={() => setRevealed((v) => !v)}
         style={[exStyles.btn, { backgroundColor: revealed ? btnBgRevealed : btnBgHidden }]}
@@ -176,7 +148,7 @@ function ExerciseCardFixed({ question, answer, explanation }: { question: string
         ) : (
           <View style={exStyles.answer}>
             <Text style={[exStyles.verdict, { color: verdictColor }]}>Gabarito: {answer}</Text>
-            <Text style={[exStyles.exp, { color: expColor }]}>{explanation}</Text>
+            <Text style={[exStyles.exp, { color: colors.foreground }]}>{explanation}</Text>
           </View>
         )}
       </Pressable>
