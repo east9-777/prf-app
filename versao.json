@@ -1,0 +1,18 @@
+{
+  "versaoMaisRecente": "1.0.0",
+  "linkApk": "https://SEU-PROJETO.web.app/apk/prf-app-1.0.0.apk",
+  "dataLancamento": "2026-08-10",
+  "novidades": [
+    "Correção de 9 erros de conteúdo (TAF, CTB, Direito Administrativo, Processual Penal, Legislação Especial PRF, Física)",
+    "Nova identidade visual com a logo Foco PRF"
+  ],
+  "historico": [
+    {
+      "versao": "1.0.0",
+      "data": "2026-08-10",
+      "novidades": [
+        "Versão inicial com sistema de atualização automática"
+      ]
+    }
+  ]
+}

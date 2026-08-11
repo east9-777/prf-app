@@ -15,6 +15,7 @@ import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { useDisplayName } from "@/hooks/useDisplayName";
+import { useAppUpdate } from "@/hooks/useAppUpdate";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const DRAWER_WIDTH = Math.min(SCREEN_WIDTH * 0.78, 320);
@@ -27,6 +28,7 @@ interface DrawerMenuProps {
 const MENU_ITEMS = [
   { icon: "calendar" as const, label: "Meu Cronograma", route: "/cronograma" },
   { icon: "flag" as const, label: "Etapas do Concurso", route: "/etapas" },
+  { icon: "bell" as const, label: "Novidades", route: "/novidades" },
   { icon: "settings" as const, label: "Configurações", route: "/settings" },
   { icon: "info" as const, label: "Créditos", route: "/credits" },
 ];
@@ -34,6 +36,7 @@ const MENU_ITEMS = [
 export function DrawerMenu({ visible, onClose }: DrawerMenuProps) {
   const colors = useColors();
   const { displayName } = useDisplayName();
+  const { updateAvailable } = useAppUpdate();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const slideAnim = useRef(new Animated.Value(-DRAWER_WIDTH)).current;
@@ -129,6 +132,9 @@ export function DrawerMenu({ visible, onClose }: DrawerMenuProps) {
               <Text style={[styles.menuLabel, { color: colors.text }]}>
                 {item.label}
               </Text>
+              {item.route === "/novidades" && updateAvailable && (
+                <View style={[styles.badgeDot, { backgroundColor: colors.destructive }]} />
+              )}
               <Feather name="chevron-right" size={16} color={colors.mutedForeground} />
             </TouchableOpacity>
           ))}
@@ -186,5 +192,11 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: "Inter_500Medium",
     fontSize: 15,
+  },
+  badgeDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 4,
   },
 });

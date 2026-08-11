@@ -52,6 +52,10 @@ function RootLayoutNav() {
         name="settings"
         options={{ headerShown: true }}
       />
+      <Stack.Screen
+        name="novidades"
+        options={{ headerShown: true }}
+      />
     </Stack>
   );
 }

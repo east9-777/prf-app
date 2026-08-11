@@ -12,6 +12,7 @@ import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { useDisplayName } from "@/hooks/useDisplayName";
+import { UpdateBanner } from "@/components/UpdateBanner";
 
 export default function InicioScreen() {
   const colors = useColors();
@@ -78,6 +79,8 @@ export default function InicioScreen() {
             Sinta o orgulho do dia da sua posse! 👮‍♂️ Estude hoje para vencer amanhã! ⚡
           </Text>
         </View>
+
+        <UpdateBanner />
 
         <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>
           ACESSO RÁPIDO
