@@ -13,10 +13,13 @@ export interface RemoteVersionInfo {
 }
 
 /**
- * URL do arquivo de versão hospedado no Firebase Hosting.
- * Troque pelo domínio real depois do deploy (ex: https://seu-projeto.web.app/versao.json).
+ * URL do arquivo de versão. Hoje aponta pro link "raw" do versao.json
+ * dentro do próprio repositório no GitHub. Toda vez que o conteúdo
+ * desse arquivo mudar no repositório, o app passa a enxergar a versão
+ * nova automaticamente — não precisa mudar essa URL de novo.
  */
-export const REMOTE_VERSION_URL = "https://SEU-PROJETO.web.app/versao.json";
+export const REMOTE_VERSION_URL =
+  "https://raw.githubusercontent.com/east9-777/prf-app/refs/heads/main/versao.json";
 
 /**
  * Compara duas versões no formato "x.y.z".
