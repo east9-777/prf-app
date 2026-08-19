@@ -56,6 +56,10 @@ function RootLayoutNav() {
         name="novidades"
         options={{ headerShown: true }}
       />
+      <Stack.Screen
+        name="ordem-estudo"
+        options={{ headerShown: true }}
+      />
     </Stack>
   );
 }

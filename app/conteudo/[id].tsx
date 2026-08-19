@@ -12,6 +12,7 @@ import { Stack, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { CONTEUDO_SUBJECTS, type TopicItem } from "@/lib/conteudoData";
+import { getOrdemMateria } from "@/lib/ordemEstudo";
 
 const INCIDENCIA_CONFIG = {
   alta:  { label: "Alta incidência",  color: "#EF4444", bg: "#EF444420" },
@@ -169,7 +170,7 @@ const exStyles = StyleSheet.create({
 
 // ─── Topic Card ───────────────────────────────────────────────────────────────
 
-function TopicCard({ topic, subjectColor }: { topic: TopicItem; subjectColor: string }) {
+function TopicCard({ topic, subjectColor, ordem }: { topic: TopicItem; subjectColor: string; ordem?: number }) {
   const colors = useColors();
   const [expanded, setExpanded] = useState(false);
   const inc = INCIDENCIA_CONFIG[topic.incidencia];
@@ -187,6 +188,11 @@ function TopicCard({ topic, subjectColor }: { topic: TopicItem; subjectColor: st
       >
         <View style={styles.topicTitleRow}>
           <View style={[styles.topicDot, { backgroundColor: subjectColor }]} />
+          {ordem !== undefined && (
+            <View style={[styles.ordemBadge, { backgroundColor: subjectColor + "1F" }]}>
+              <Text style={[styles.ordemBadgeText, { color: subjectColor }]}>{ordem}º</Text>
+            </View>
+          )}
           <Text style={[styles.topicTitle, { color: colors.text }]}>
             {topic.title}
           </Text>
@@ -284,6 +290,15 @@ export default function ConteudoDetailScreen() {
 
   const subject = CONTEUDO_SUBJECTS.find((s) => s.id === id);
 
+  const ordemMap = subject ? getOrdemMateria(subject.id) : undefined;
+  const orderedTopics = subject
+    ? [...subject.topics].sort((a, b) => {
+        const oa = ordemMap?.find((o) => o.topicId === a.id)?.ordem ?? 999;
+        const ob = ordemMap?.find((o) => o.topicId === b.id)?.ordem ?? 999;
+        return oa - ob;
+      })
+    : [];
+
   if (!subject) {
     return (
       <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -354,7 +369,7 @@ export default function ConteudoDetailScreen() {
         >
           <Feather name="info" size={14} color={subject.color} />
           <Text style={[styles.tipText, { color: colors.mutedForeground }]}>
-            Toque em cada tópico para expandir o conteúdo, pontos-chave, exemplos e exercícios comentados.
+            Os tópicos abaixo estão na ordem recomendada de estudo — comece pelo 1º. Toque em cada um para expandir o conteúdo, pontos-chave, exemplos e exercícios comentados.
           </Text>
         </View>
 
@@ -362,9 +377,12 @@ export default function ConteudoDetailScreen() {
           TÓPICOS
         </Text>
 
-        {subject.topics.map((topic) => (
-          <TopicCard key={topic.id} topic={topic} subjectColor={subject.color} />
-        ))}
+        {orderedTopics.map((topic) => {
+          const ordem = ordemMap?.find((o) => o.topicId === topic.id)?.ordem;
+          return (
+            <TopicCard key={topic.id} topic={topic} subjectColor={subject.color} ordem={ordem} />
+          );
+        })}
       </ScrollView>
     </View>
   );
@@ -471,6 +489,15 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
+  },
+  ordemBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  ordemBadgeText: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 10,
   },
   topicTitle: {
     fontFamily: "Inter_600SemiBold",

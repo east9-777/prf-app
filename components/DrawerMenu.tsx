@@ -27,6 +27,7 @@ interface DrawerMenuProps {
 
 const MENU_ITEMS = [
   { icon: "calendar" as const, label: "Meu Cronograma", route: "/cronograma" },
+  { icon: "compass" as const, label: "Ordem de Estudo", route: "/ordem-estudo" },
   { icon: "flag" as const, label: "Etapas do Concurso", route: "/etapas" },
   { icon: "bell" as const, label: "Novidades", route: "/novidades" },
   { icon: "settings" as const, label: "Configurações", route: "/settings" },
